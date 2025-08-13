@@ -7,7 +7,7 @@
 ---
 ### 1. Objetivo
 
-El objetivo de esta misión es modificar nuestros 4 scripts canónicos de Google Apps Script para crear un **Producto Mínimo Viable (MVP)** de nuestro Monitor Maestro. Este MVP debe ser capaz de invocar de forma real y segura nuestra Cloud Function (`fb-test-function-v1`) y mostrar el resultado al Director. Se centrará únicamente en la **lectura de datos**.
+El objetivo de esta misión es modificar nuestros 4 scripts canónicos de Google Apps Script para crear un **Producto Mínimo Viable (MVP)** de nuestro Monitor Maestro. Este MVP debe ser capaz de **invocar de forma real y segura nuestra función `nexus-ingest`** y mostrar la respuesta (el `taskId`) al Director.
 
 ### 2. Componentes a Modificar
 
@@ -17,23 +17,18 @@ El objetivo de esta misión es modificar nuestros 4 scripts canónicos de Google
 
 ### 3. Lógica de Funcionamiento Propuesta
 
-El flujo de trabajo será el siguiente:
+1.  **En `monitor.html`:** Se añadirá un campo de texto para escribir una orden y un botón "Enviar a NEXUS". También un área para mostrar la respuesta.
 
-1.  **En `monitor.html`:** Se añadirá un botón con el texto "Refrescar Archivos" y un área (`<div>`) para mostrar la lista de archivos de nuestra carpeta `_autonomus_workspace`.
+2.  **En `JavaScript.html`:** El `onclick` del botón llamará a una función del backend, `enviarOrdenANexus(orden)`, usando `google.script.run`, con manejadores para el éxito y el fallo.
 
-2.  **En `JavaScript.html`:**
-    * El `onclick` del botón llamará a una función del backend, `obtenerListaDeArchivos()`, usando `google.script.run`.
-    * Se implementarán `withSuccessHandler(listaDeArchivos)` y `withFailureHandler(error)` para recibir el resultado y mostrarlo en el área designada.
-
-3.  **En `codigo.gs` (El Orquestador de Apps Script):**
-    * La función `obtenerListaDeArchivos()` será la responsable de la comunicación con nuestro "robot" de prueba, que por ahora solo sabe crear archivos. **Para esta primera misión, simularemos la lectura.** La función devolverá una lista de archivos de ejemplo para probar que la conexión frontend-backend funciona.
-    * **NOTA:** La conexión real a nuestra Cloud Function de lectura se implementará en la siguiente misión, una vez que el "esqueleto" de la interfaz esté validado.
+3.  **En `codigo.gs` (El Orquestador de Apps Script):** La función `enviarOrdenANexus(orden)` se encargará de:
+    * **Obtener el Token de Identidad** del usuario actual (`ScriptApp.getIdentityToken()`) para la autenticación de Nivel 1.
+    * **Obtener la Llave Secreta** (`NEXUS_SECRET_KEY`) desde Google Secret Manager para la autenticación de Nivel 2.
+    * **Preparar y Firmar** el comando con el método HMAC que ya definimos.
+    * **Ejecutar la Llamada** a la URL de `nexus-ingest` usando `UrlFetchApp`, incluyendo ambas credenciales en las cabeceras.
+    * **Devolver la respuesta** (`{"status":"ok",...}`) al frontend.
 
 ### 4. Mandato para la Ronda de Escrutinio
 
-* **Para el Arquitecto (ChatGPT):**
-    * Revise esta lógica de tres capas para el MVP. ¿Es el enfoque correcto empezar con datos de ejemplo para validar la interfaz?
-    * Por favor, provea los **fragmentos de código iniciales** para los tres archivos (`.html`, `.js`, `.gs`) para implementar esta funcionalidad de "lectura simulada".
-
-* **Para el Custodio de Riesgos (Copilot):**
-    * Aunque la llamada a la Cloud Function externa aún no se implementa, ¿qué riesgos de seguridad debemos considerar desde ahora en la forma en que se estructura el frontend en Apps Script? ¿Cómo debemos manejar los errores para que no expongan información sensible al usuario?
+* **Para el Arquitecto (ChatGPT):** Revise esta lógica. ¿Es la más eficiente? Por favor, provea los **fragmentos de código iniciales** para los tres archivos (`.html`, `.js`, `.gs`) para implementar esta funcionalidad.
+* **Para el Custodio de Riesgos (Copilot):** Revise la seguridad. ¿Qué **OAuth scopes** se necesitan en el manifiesto de Apps Script (`appsscript.json`) para que `ScriptApp.getIdentityToken()` y el acceso a Secret Manager funcionen? ¿Cómo garantizamos que la llave secreta se maneje de forma segura en el entorno de Apps Script?
