@@ -1,0 +1,15 @@
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Monitor Maestro cargado - Fase 1.1");
+    function updateStatus(color) {
+        const indicator = document.getElementById("status-indicator");
+        indicator.className = `status-${color}`;
+    }
+    function ejecutar() { console.log("Ejecutar comando..."); }
+    function detener() { console.log("Detener comando..."); }
+    function reiniciar() { console.log("Reiniciar comando..."); }
+    document.querySelectorAll("button")[0].addEventListener("click", ejecutar);
+    document.querySelectorAll("button")[1].addEventListener("click", detener);
+    document.querySelectorAll("button")[2].addEventListener("click", reiniciar);
+});
+</script>

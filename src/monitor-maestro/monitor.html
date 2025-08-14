@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Maestro - MVP</title>
+    <?!= include('CSS'); ?>
+</head>
+<body>
+    <header>
+        <h1>Monitor Maestro</h1>
+        <div id="status-indicator" class="status-green"></div>
+    </header>
+    <main class="layout">
+        <section class="col col-nav">
+            <h2>Navegación</h2>
+            <ul>
+                <li>Inicio</li>
+                <li>Módulos</li>
+                <li>Documentos</li>
+                <li>Configuración</li>
+            </ul>
+        </section>
+        <section class="col col-content">
+            <h2>Área de Contenido</h2>
+            <div class="placeholder">Aquí se mostrarán los archivos y datos</div>
+        </section>
+        <section class="col col-actions">
+            <h2>Acciones Rápidas</h2>
+            <button>Ejecutar</button>
+            <button>Detener</button>
+            <button>Reiniciar</button>
+        </section>
+    </main>
+    <footer class="diagnostics">
+        <h3>Panel de Diagnóstico</h3>
+        <div class="diagnostics-output">Esperando datos de diagnóstico...</div>
+    </footer>
+    <?!= include('JavaScript'); ?>
+</body>
+</html>
