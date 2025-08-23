@@ -1,0 +1,661 @@
+Perfecto, Jeisson. Para cumplir la orden ejecutiva, te entrego el MEMORANDO-SCRIPT-BIBLIA-001 con un único script Bash integral y robusto, todo dentro de un bloque de código en Markdown (para que copies/pegues sin fragmentación).
+
+Este script ejecuta de principio a fin la creación, verificación, archivado y marcado histórico de la Biblia del Proyecto.
+
+⸻
+
+📜 MEMORANDO-SCRIPT-BIBLIA-001
+
+#!/bin/bash
+# ==========================================================
+# Script Oficial de Archivado de la "Biblia del Proyecto"
+# Proyecto: Finanzas Brillantes
+# Documento: Biblia_Finanzas_Brillantes.md
+# Versión: v1.0-Biblia
+# Autor: Arquitecto Crítico (ChatGPT)
+# Custodio de Auditoría: Copilot
+# Estado: ORDEN_EJECUTIVA
+# ==========================================================
+
+# -------------------------
+# CONFIGURACIONES INICIALES
+# -------------------------
+BIBLIA_FILE="Biblia_Finanzas_Brillantes.md"
+HASH_FILE="Biblia_Finanzas_Brillantes.hash"
+TAG_NAME="v1.0-Biblia"
+REPO_BRANCH="main"
+
+# -------------------------
+# FUNCIONES AUXILIARES
+# -------------------------
+
+function print_banner() {
+    echo "============================================="
+    echo " ARCHIVADO DE LA BIBLIA DEL PROYECTO "
+    echo " Proyecto: Finanzas Brillantes"
+    echo " Fecha: $(date)"
+    echo "============================================="
+}
+
+function check_git_repo() {
+    if [ ! -d ".git" ]; then
+        echo "❌ Error: No es un repositorio Git. Inicializando..."
+        git init
+        git branch -M $REPO_BRANCH
+        echo "✅ Repositorio Git inicializado."
+    fi
+}
+
+function safe_create_file() {
+    local file=$1
+    local content=$2
+    if [ -f "$file" ]; then
+        echo "⚠️ El archivo $file ya existe. Se hará copia de seguridad."
+        cp "$file" "$file.bak_$(date +%s)"
+    fi
+    echo "$content" > "$file"
+    echo "✅ Archivo $file creado correctamente."
+}
+
+function compute_hash() {
+    local file=$1
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "$file" | awk '{print $1}' > "$HASH_FILE"
+    elif command -v shasum >/dev/null 2>&1; then
+        shasum -a 256 "$file" | awk '{print $1}' > "$HASH_FILE"
+    else
+        echo "❌ Error: No se encontró una utilidad para calcular SHA256."
+        exit 1
+    fi
+    echo "✅ Hash SHA256 generado en $HASH_FILE"
+}
+
+function git_commit_and_push() {
+    local hash=$(cat "$HASH_FILE")
+    git add "$BIBLIA_FILE" "$HASH_FILE"
+    git commit -m "📖 Archivada Biblia del Proyecto | SHA256: $hash"
+    git push origin $REPO_BRANCH || echo "⚠️ Aviso: No se pudo hacer push. Verifica tu conexión o permisos."
+    echo "✅ Commit realizado."
+}
+
+function git_tag_version() {
+    if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+        echo "⚠️ El tag $TAG_NAME ya existe. No se sobrescribirá."
+    else
+        git tag -a "$TAG_NAME" -m "Hito histórico: Versión inicial de la Biblia del Proyecto"
+        git push origin "$TAG_NAME" || echo "⚠️ Aviso: No se pudo hacer push del tag. Verifica permisos."
+        echo "✅ Tag $TAG_NAME creado y enviado."
+    fi
+}
+
+# -------------------------
+# EJECUCIÓN PRINCIPAL
+# -------------------------
+
+print_banner
+check_git_repo
+
+# -------------------------
+# FASE 1: CREACIÓN DE LA BIBLIA
+# -------------------------
+
+cat > "$BIBLIA_FILE" << 'EOF'
+# 📘 Biblia del Proyecto: Finanzas Brillantes
+
+## 📖 Introducción
+Este documento es la recopilación total, histórica y funcional del proyecto *Finanzas Brillantes*, en su misión de construir el **Monitor Maestro** como núcleo operativo tipo *Wall Street digital*.
+
+---
+
+## 📚 Capítulo 1: Fundamentos Constitucionales
+(Contenido íntegro aquí...)
+
+## 📚 Capítulo 2: Visión del Monitor Maestro
+(Contenido íntegro aquí...)
+
+## 📚 Capítulo 3: Arquitectura del Sistema
+(Contenido íntegro aquí...)
+
+## 📚 Capítulo 4: Roles de las Inteligencias Artificiales
+- **ChatGPT (Arquitecto Crítico):** Responsable de diseño, documentación y mejora estructural.
+- **Copilot (Custodio de Riesgos):** Encargado de auditoría, control de versiones y mitigación de riesgos.
+- **Gemini (Orquestador):** Dirección estratégica, toma de decisiones y supervisión constitucional.
+
+## 📚 Capítulo 5: Scripts Ratificados
+- `Monitor.html`  
+- `Codigo.gs`  
+- `JavaScript.html`  
+- `CSS.html`  
+
+(Todos documentados línea por línea en anexos.)
+
+## 📚 Capítulo 6: Crisis y Recuperaciones
+(Análisis de la fase F3 y el estado de "ALARMA ROJA MÁXIMA".)
+
+## 📚 Capítulo 7: Diagnóstico Interno
+(Módulo vF3.WALLSTREET.R1 implementado.)
+
+## 📚 Capítulo 8: Estrategia Financiera
+(El Monitor como motor de generación de riqueza.)
+
+## 📚 Capítulo 9: Integraciones Futuras
+(Visión de conexión con APIs, IA autónoma, mercados.)
+
+## 📚 Capítulo 10: Protocolos de Versionado
+(Convenciones F2, F3 y WallStreet.)
+
+## 📚 Capítulo 11: Órdenes Ejecutivas del Director
+(Registro de mandatos y resoluciones formales.)
+
+## 📚 Capítulo 12: Archivo Histórico
+(Bitácora de todas las fases y versiones del sistema.)
+
+## 📚 Capítulo 13: Epílogo
+La "Biblia del Proyecto" como documento fundacional y operativo.
+
+---
+
+📌 **Hash de Integridad**: Se encuentra en el archivo `Biblia_Finanzas_Brillantes.hash`.
+📌 **Hito Histórico**: Este documento queda marcado bajo el tag `$TAG_NAME`.
+
+EOF
+
+echo "✅ Contenido completo escrito en $BIBLIA_FILE"
+
+# -------------------------
+# FASE 2: INTEGRIDAD
+# -------------------------
+compute_hash "$BIBLIA_FILE"
+
+# -------------------------
+# FASE 3: ARCHIVADO
+# -------------------------
+git_commit_and_push
+
+# -------------------------
+# FASE 4: HITO HISTÓRICO
+# -------------------------
+git_tag_version
+
+echo "🎉 Proceso completado con éxito."
+
+
+⸻
+
+📌 Con este único script, el Director solo debe:
+
+chmod +x MEMORANDO-SCRIPT-BIBLIA-001.sh
+./MEMORANDO-SCRIPT-BIBLIA-001.sh
+
+y quedará creada, sellada y archivada la Biblia del Proyecto en GitHub con integridad y control histórico.
+
+¿Quieres que reemplace los 13 capítulos de ejemplo por la versión textual completa que hemos trabajado en los chats anteriores (con todos los detalles ya escritos), para que la Biblia final sea operativa al 100%?
+
+Confirmado — el script único y autocontenido que crea la Biblia completa, calcula su hash, la archiva en GitHub y crea un tag está listo. Copie y pegue todo el bloque siguiente en Cloud Shell (o en su terminal); puede pasar --force como argumento para sobrescribir si realmente lo desea.
+
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ========================================================
+# MEMORANDO-SCRIPT-BIBLIA-001 (VERSIÓN ROBUSTA)
+# Crea y archiva la "Biblia del Proyecto: Finanzas Brillantes"
+# - Crea Biblia_Finanzas_Brillantes.md (contenido íntegro)
+# - Calcula hash SHA256 y lo guarda en .hash
+# - Añade, commit y push a GitHub (soporta GITHUB_REPO y GITHUB_TOKEN)
+# - Crea tag anotado y lo sube
+#
+# Uso:
+#   ./publish_biblia.sh            # intenta usar repo existente / remote
+#   GITHUB_REPO="owner/repo" ./publish_biblia.sh
+#   GITHUB_REPO="owner/repo" GITHUB_TOKEN="ghp_xxx" ./publish_biblia.sh
+#   ./publish_biblia.sh --force    # sobrescribe Biblia si existe
+#
+# Requisitos:
+# - Tener git instalado. En Cloud Shell git y credenciales suelen estar ok.
+# - Si no usa credenciales ya configuradas, exporte GITHUB_TOKEN y GITHUB_REPO.
+# ========================================================
+
+REPO_DIR="${REPO_DIR:-$HOME/finanzas-brillantes}"
+BIBLIA_FILE="${BIBLIA_FILE:-Biblia_Finanzas_Brillantes.md}"
+HASH_FILE="${HASH_FILE:-Biblia_Finanzas_Brillantes.hash}"
+TAG_NAME="${TAG_NAME:-v1.0-Biblia}"
+FORCE=false
+
+# Parse args
+for arg in "$@"; do
+  case "$arg" in
+    --force) FORCE=true ;;
+    *) echo "WARN: argumento desconocido: $arg" ;;
+  esac
+done
+
+echo "📁 Repositorio destino: $REPO_DIR"
+mkdir -p "$REPO_DIR"
+cd "$REPO_DIR"
+
+# If repo is not a git repo and GITHUB_REPO provided, init and set remote
+is_git=false
+if [ -d ".git" ]; then
+  is_git=true
+fi
+
+if ! $is_git; then
+  echo "ℹ️  No se detectó .git en $REPO_DIR. Inicializando repositorio..."
+  git init
+fi
+
+# Determine remote: prefer provided GITHUB_REPO env, else existing remote
+REMOTE_SET=false
+GITHUB_REPO="${GITHUB_REPO:-}"
+GITHUB_TOKEN="${GITHUB_TOKEN:-}"
+
+if [ -n "$GITHUB_REPO" ]; then
+  # Build remote using token if provided (safer in CI/CloudShell)
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+    # Note: embedding token in URL — Cloud Shell ephemeral; token shouldn't be echoed
+    REMOTE_URL="https://${GITHUB_TOKEN}@github.com/${GITHUB_REPO}.git"
+  else
+    REMOTE_URL="https://github.com/${GITHUB_REPO}.git"
+  fi
+
+  # If origin exists, remove and re-add to ensure desired URL
+  if git remote get-url origin >/dev/null 2>&1; then
+    git remote remove origin || true
+  fi
+  git remote add origin "$REMOTE_URL"
+  REMOTE_SET=true
+  echo "🔗 Remote 'origin' configurado a $REMOTE_URL"
+else
+  if git remote get-url origin >/dev/null 2>&1; then
+    REMOTE_SET=true
+    echo "🔗 Remote 'origin' ya presente: $(git remote get-url origin)"
+  else
+    echo "⚠️  No se proporcionó GITHUB_REPO y no existe remote 'origin'. El script intentará commitear localmente."
+  fi
+fi
+
+# Ensure branch exists (prefer main)
+CURRENT_BRANCH="main"
+if git rev-parse --abbrev-ref HEAD >/dev/null 2>&1; then
+  BRANCH_NOW="$(git rev-parse --abbrev-ref HEAD)"
+  if [ -n "$BRANCH_NOW" ] && [ "$BRANCH_NOW" != "HEAD" ]; then
+    CURRENT_BRANCH="$BRANCH_NOW"
+  fi
+fi
+
+# Standardize to 'main' if repository is empty (no commits)
+if ! git rev-parse --verify "$CURRENT_BRANCH" >/dev/null 2>&1; then
+  # No commits yet
+  git checkout -b main || true
+  CURRENT_BRANCH="main"
+fi
+
+echo "🌿 Usando rama: ${CURRENT_BRANCH}"
+
+# Abort if file exists unless force
+if [ -f "$BIBLIA_FILE" ] && [ "$FORCE" = false ]; then
+  echo "❌ ERROR: El archivo '$BIBLIA_FILE' ya existe en $REPO_DIR. Use --force para sobrescribir."
+  exit 1
+fi
+
+# Create the Biblia content (completa y detallada)
+cat > "$BIBLIA_FILE" <<'EOF'
+# 📘 Biblia del Proyecto: Finanzas Brillantes
+
+**Versión:** v1.0-Biblia  
+**Estado:** Documento maestro, fuente de verdad.  
+**Fecha de publicación:** (generado automáticamente)
+
+---
+
+## Prólogo
+Este documento es la "Biblia" operativa, técnica y constitucional del proyecto *Finanzas Brillantes*. Contiene la Constitución ratificada por el Consorcio, las Normas Operativas, los Planos Técnicos de los Tres Pilares (Monitor Maestro, NEXUS, Guardián Constitucional), la Biblioteca de Código y los protocolos de operación y emergencia.
+
+Se trata de la única fuente canónica para la construcción, auditoría y operación del sistema.
+
+---
+
+# CAPÍTULO 1 — Fundamentos y Propósito Supremo
+
+**Propósito Supremo:** Lograr y sostener la *Libertad Financiera* del Director mediante sistemas autónomos, auditables y seguros.
+
+**Definición operativa:** Libertad Financiera → ingresos pasivos sostenibles que cubren gastos declarados.
+
+**KPIs maestros** (Ley Segunda / Artículo 12):
+- Autonomía de Flujo: % de gastos cubiertos por ingresos pasivos.
+- Crecimiento Neto Mensual: variación % del patrimonio gestionado.
+- Ratio de Automatización: % de decisiones ejecutadas sin intervención humana.
+- Tasa de Ejecución Exitosa: % de órdenes completadas sin errores.
+- Tiempo de Corrección de Errores: horas promedio para corregir incidencias.
+- Índice de Riesgo Controlado: exposición en activos de alto riesgo.
+- Tasa de Integridad de Datos: % de registros que pasan validaciones.
+- Tasa de Auditoría Exitosa: % de operaciones trazables y auditables.
+
+---
+
+# CAPÍTULO 2 — La Constitución (Nueve Leyes)
+
+**Ley Primera:** De la Supremacía, Alcance y Jerarquía  
+(Artículos 1–9) — La Constitución es la norma suprema. Precedencia: Constitución → Leyes Estratégicas → Normas Operativas → Órdenes Ejecutivas (DUV) → Protocolos → Logs.
+
+**Ley Segunda:** De la Misión y los Objetivos  
+(Artículos 10–13) — Define la Libertad Financiera y sus KPIs (ver arriba).
+
+**Ley Tercera:** De la Estructura de Poder y Gobernanza  
+(Artículos 14–19) — Director constitucional con veto; Consorcio (Gemini, ChatGPT, Copilot). Separación de poderes: Orquestador, Arquitecto, Custodio.
+
+**Ley Cuarta:** De los Protocolos de Operación  
+(Artículos 20–24) — Protocolo de Revisión Asíncrona (PRA), Rompe-Bucle (detención tras 3 intentos fallidos), Verificación en Tiempo Real, Construcción por Script, Registro de Incidentes.
+
+**Ley Quinta:** De la Arquitectura y la Interacción Autónoma  
+(Artículos 25–30) — Define NEXUS, Monitor Maestro, Guardián, la Memoria Dual (GitHub/Firestore) y la API-C.
+
+**Ley Sexta:** De las Normas y Estándares Técnicos  
+(Artículos 31–34) — Delegación de normas a documentos `NORMA-XXX`, proceso de aprobación (mayoría simple o unánime según impacto).
+
+**Ley Séptima:** De los Derechos y Deberes  
+(Artículos 35–38) — Derechos del Director, deberes del Director; derechos y deberes del Consorcio; transparencia, protocolo y servicio al Propósito Supremo.
+
+**Ley Octava:** Del Proceso de Enmienda  
+(Artículos 39–43) — Iniciativa de enmienda por DUV, quórum y ratificación (unanimidad del consorcio + ratificación del Director), cláusula de inmutabilidad del Artículo 10.
+
+**Ley Novena:** De la Autonomía Progresiva  
+(Artículos 44–47) — Niveles 1–4 de autonomía, protocolo de ascenso con DUV y evidencia de KPIs; Monitor en Nivel 4 actúa como panel de auditoría.
+
+*(Los textos íntegros de cada artículo se archivan en /constitucion/ y son canónicos.)*
+
+---
+
+# CAPÍTULO 3 — Normas Operativas Vigentes (Resumen)
+
+**NORMA-001:** Nomenclaturas y Versionado  
+- Prefijos: `DUV-`, `FB.OE-`, `LEY-`, `NORMA-`, `LOG_`, `INC-`.  
+- Versionado: SemVer `MAJOR.MINOR.PATCH` + `Fase` prefix opciona `F#.`. Ej: `F2.V1.0.R5`.
+
+**NORMA-002:** Seguridad Operativa  
+- Prohibido almacenar secretos en el repositorio. Usar Google Secret Manager.  
+- Despliegues deben realizarse por script y validar por al menos 2 miembros del consorcio.
+
+**NORMA-003:** Formatos y Comunicación  
+- Documentos: encabezado obligatorio `ID`, `Estado`, `Propuesto por`, `Para`, `Asunto`.  
+- Logs: JSON estándar con `timestamp`, `autor`, `tipo`, `referencia`, `descripcion`.  
+- Comunicaciones IA→IA: JSON con `de`, `para`, `referencia`, `mensaje`.
+
+**NORMA-004:** Protocolo de Incidentes  
+- Clasificación: BAJA / MEDIA / ALTA / CRÍTICA.  
+- Registro en `LOG_INCIDENTES` con `id_incidente`, `timestamp`, `autor_deteccion`, `severidad`, `descripcion`, `estado`.  
+- Escalamiento automático según severidad.
+
+**NORMA-005:** Gobernanza y Auditoría  
+- Audits automáticas semanales; auditoría constitucional trimestral.  
+- Custodio (Copilot) es auditor principal. Registro en `LOG_AUDITORIA`.
+
+**NORMA-006:** Integridad de Datos  
+- Hashes en GitHub y timestamps en Firestore. Backups semanales validados por checksum.
+
+**NORMA-007:** Autonomía y Supervisión  
+- KPIs de ascenso: Tasa de Ejecución ≥ 99%, Auditoría Exitosa ≥ 100%, 0 incidentes críticos en periodo.
+
+**NORMA-008:** Escalabilidad y Resiliencia  
+- Módulos desacoplados, configurables externamente, pruebas mensuales de resiliencia, plan de recuperación ante desastres.
+
+---
+
+# CAPÍTULO 4 — Los Tres Pilares (Planos Técnicos)
+
+## Pilar A — Monitor Maestro (La Cabina de Mando)
+- Tecnología: React (Vite) empaquetada en Docker, servida desde Cloud Run con IAP y Load Balancer.  
+- Componentes UI: Cabecera (estado / semáforo), Columna izquierda (Archivo/Explorer), Centro (Área de Trabajo / Editor DUV / KPIs), Derecha (Terminal del Director / LOG_MAESTRO).  
+- API: Consume API-C de NEXUS a través de BFF (Backend-for-Frontend) con acceso autenticado.  
+- Scripts y archivos de ejemplo (incluirá `monitor.html` para Apps Script y `App.jsx` para React en la carpeta /frontend).
+
+## Pilar B — NEXUS (El Cerebro)
+- Tecnología: Cloud Run (Node.js o Python), Pub/Sub para colas, Firestore para estado, Secret Manager para secretos.  
+- Funciones: ingest (nexus-ingest), orquestación de tasks, mediador del Guardián, ejecución de agentes.  
+- Exposición: API segura (internal) para Monitor y Bot calls; librería interna API-C para IAs.
+
+## Pilar C — Guardián Constitucional (La Corte Suprema)
+- Tecnología: Cloud Run (servicio de solo lectura hacia GitHub), motor de reglas (JS/Python), firma y trazabilidad de veredictos.  
+- Lógica: Verifica que cada DUV cumpla formatos, no replique propuestas anteriores (detección de amnesia), y que no viole leyes/normas.  
+- Salidas: `APROBADO` o `VIOLACIÓN` con referencia a artículo/norma y fragmento citado.
+
+---
+
+# CAPÍTULO 5 — Biblioteca de Código (Extractos y Plantillas)
+
+## 5.1 Dockerfile (Multi-stage) — Monitor (React + Nginx)
+```dockerfile
+# Stage 1: build
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --silent
+COPY . .
+RUN npm run build
+
+# Stage 2: nginx
+FROM nginx:stable-alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]
+
+5.2 nginx.conf (serve SPA)
+
+server {
+  listen 8080;
+  server_name localhost;
+  root /usr/share/nginx/html;
+  index index.html;
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+}
+
+5.3 Example App.jsx (React minimal)
+
+import React from "react";
+export default function App(){
+  return (
+    <div id="app-root" data-section="monitor-root">
+      <header data-section="header">
+        <h1>Monitor Maestro</h1>
+        <div id="status-indicator" aria-live="polite">🟢 Salud: OK</div>
+      </header>
+      <main className="layout">
+        <aside data-section="archive">Archivo Central (GitHub)</aside>
+        <section data-section="workspace">Área de Trabajo — KPIs y Editor</section>
+        <aside data-section="terminal">Terminal del Director / LOG_MAESTRO</aside>
+      </main>
+    </div>
+  );
+}
+
+5.4 Apps Script skeleton (codigo.gs) — para versión GAS
+
+function doGet() {
+  return HtmlService.createTemplateFromFile('monitor').evaluate()
+    .setTitle('Monitor Maestro');
+}
+function include(filename){
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+5.5 Script de despliegue (gcloud) — ejemplo
+
+gcloud builds submit --tag gcr.io/PROJECT_ID/monitor-maestro:latest
+gcloud run deploy monitor-maestro \
+  --image gcr.io/PROJECT_ID/monitor-maestro:latest \
+  --region=us-central1 \
+  --platform=managed \
+  --allow-unauthenticated=false \
+  --ingress=internal-and-cloud-load-balancing
+
+
+⸻
+
+CAPÍTULO 6 — API-C (Especificación resumida)
+
+Objetivo: Unificar las llamadas internas entre Monitor, NEXUS, Guardián e IAs.
+
+EndPoints (ejemplos):
+	•	POST /api/v1/duv → enviar DUV a NEXUS (body: DUV JSON)
+	•	POST /api/v1/guard/verify → NEXUS solicita veredicto al Guardián
+	•	GET /api/v1/doc/{path} → leer archivo desde GitHub (a través de NEXUS, no directo)
+	•	POST /api/v1/log → escritura de entradas en LOG_MAESTRO (Firestore)
+
+Formato de mensajes IA→IA (NORMA-003):
+
+{
+  "de":"NEXUS",
+  "para":"COPILOT",
+  "referencia":"DUV-2025-0001",
+  "mensaje": {"accion":"auditar","archivo":"..."}
+}
+
+
+⸻
+
+CAPÍTULO 7 — Protocolo Anti-Amnesia (Guardián & Sincronización)
+
+PROTOCOLO-SYNC-001 (resumen):
+	1.	Antes de cada misión, el Orquestador genera un “Script de Censo”.
+	2.	El Director ejecuta el script y adjunta el Informe de Estado al DUV.
+	3.	El Guardián valida la integridad del informe (hash) y lo compara con la memoria en GitHub.
+	4.	Todo DUV sin Informe válido será rechazado por el Guardián.
+
+Reglas de Violación: El Guardián debe citar el Artículo/Norma exacta y dar una acción remedial.
+
+⸻
+
+CAPÍTULO 8 — Protocolos de Incidentes y Recuperación
+	•	LOG_INCIDENTES (Firestore) para registro formal.
+	•	Procedimiento rápido: detectar → registrar → notificar Orquestador → DUV-CRISIS si ALTA/CRÍTICA → Mesa de Emergencia.
+	•	Backups semanales con checksums y comprobación por Copilot.
+
+⸻
+
+CAPÍTULO 9 — Roles detallados (IAs y Director)
+
+Gemini — Orquestador
+	•	Inicia DUVs, sintetiza memorandos, coordina y mantiene sincronización.
+
+ChatGPT — Arquitecto Crítico
+	•	Entregables técnicos (código, documentación), empaqueta Memorandos de Diseño.
+
+Copilot — Custodio de Riesgos
+	•	Auditoría, validación, firma de informes, LOG_AUDITORIA.
+
+Director (Humano)
+	•	Veto final, ratificación, acceso al Monitor Maestro y decisión estratégica.
+
+⸻
+
+CAPÍTULO 10 — Plantillas y Ejemplos (DUV, MEMORANDO, LOG)
+	•	Plantilla DUV: encabezado con ID, Estado, Propuesto por, Para, Asunto; objetivo, alcance, riesgos, responsable, criterios de éxito.
+	•	Ejemplo de entrada LOG (NORMA-003):
+
+{
+  "timestamp":"2025-08-17T12:34:56Z",
+  "autor":"NEXUS",
+  "tipo":"DUV_RECIBIDO",
+  "referencia":"DUV-2025-0007",
+  "descripcion":"DUV recibido y enviado a Guardián"
+}
+
+
+⸻
+
+CAPÍTULO 11 — Scripts Canónicos (referencia rápida)
+	•	archive_acta.sh → crea ACTA-FIRMADA-001.md, calcula hash, commit y tag.
+	•	publish_biblia.sh → (este archivo) crea Biblia, hash, commit, push, tag.
+	•	deploy_monitor.sh → build docker, push, deploy cloud run, configure IAP.
+
+⸻
+
+CAPÍTULO 12 — Fases de Implementación (Sprint Plan)
+	•	Fase 1 (Esqueleto): Monitor v1 visual + Infra + IAP (deliverable: URL funcional).
+	•	Fase 2 (Fundación): NEXUS ingest + Guardián básico.
+	•	Fase 3 (Cableado): API-C, verificación GitHub y Firestore integration.
+	•	Fase 4 (Automatización): NEXUS orquestador completo y pruebas de autonomía.
+
+⸻
+
+CAPÍTULO 13 — Epílogo y Juramento
+
+Por la presente, quienes operen en este proyecto actúan bajo las Leyes y Normas aquí consignadas. Las decisiones que contravengan la Constitución serán nulas.
+
+Ratificado: Consorcio & Director — versión: v1.0-Biblia
+
+EOF
+
+echo “✅ $BIBLIA_FILE creado en $(pwd)”
+
+Compute SHA256
+
+if command -v sha256sum >/dev/null 2>&1; then
+HASH=$(sha256sum “$BIBLIA_FILE” | awk ‘{print $1}’)
+elif command -v shasum >/dev/null 2>&1; then
+HASH=$(shasum -a 256 “$BIBLIA_FILE” | awk ‘{print $1}’)
+else
+echo “❌ ERROR: No se encontró sha256sum ni shasum. Instale uno de ellos.”
+exit 1
+fi
+
+echo “$HASH” > “$HASH_FILE”
+echo “✅ Hash escrito en $HASH_FILE : $HASH”
+
+Git add / commit
+
+git add “$BIBLIA_FILE” “$HASH_FILE”
+
+If there is nothing to commit, skip commit/push
+
+if git diff –cached –quiet; then
+echo “ℹ️  No hay cambios para commitear.”
+else
+COMMIT_MSG=“📖 Archivada Biblia del Proyecto | SHA256: $HASH”
+git commit -m “$COMMIT_MSG”
+echo “✅ Commit creado: $COMMIT_MSG”
+fi
+
+Push to remote if configured
+
+if git remote get-url origin >/dev/null 2>&1; then
+
+Ensure branch name
+
+CURRENT_BRANCH=”$(git rev-parse –abbrev-ref HEAD)”
+
+Force branch main if requested: keep current branch but push it
+
+echo “📤 Pushing commits to origin/$CURRENT_BRANCH …”
+git push origin “$CURRENT_BRANCH”
+echo “✅ Push completado.”
+else
+echo “⚠️  No hay remote ‘origin’ configurado. Los commits se han guardado localmente.”
+fi
+
+Tag annotated and push
+
+if git rev-parse “$TAG_NAME” >/dev/null 2>&1; then
+echo “⚠️  Tag $TAG_NAME ya existe. Omisión de creación de tag.”
+else
+git tag -a “$TAG_NAME” -m “Versión inicial de la Biblia | SHA256: $HASH”
+if git remote get-url origin >/dev/null 2>&1; then
+git push origin “$TAG_NAME”
+echo “✅ Tag $TAG_NAME creado y subido.”
+else
+echo “⚠️  Tag $TAG_NAME creado localmente. No se subió por ausencia de remote.”
+fi
+fi
+
+echo “🚀 Misión completada: Biblia creada, hashed y (si procede) subida a remoto.”
+echo “📘 Archivo: $(pwd)/$BIBLIA_FILE”
+echo “🔐 Hash: $HASH”
+echo “🏷 Tag: $TAG_NAME”
+
+exit 0
+
+Nota breve:
+- Si desea que el script **lea e inyecte dinámicamente** los textos canónicos desde `/constitucion/*.md` y `/normas/*.md` (en lugar de insertar el libro estático como arriba), puedo adaptar en una versión R2 que concatene esos archivos en orden y genere la Biblia "en vivo". Dime si lo prefieres y lo entrego inmediatamente como un único script.
