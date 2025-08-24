@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "src/monitor-mvp",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
