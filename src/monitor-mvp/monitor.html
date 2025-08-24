@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor MVP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="main-header">
+    <h1>🚀 Monitor MVP</h1>
+  </header>
+
+  <main class="monitor-container">
+    <section class="column missions">
+      <h2>Carga de Misiones</h2>
+      <div class="content-placeholder">
+        <form id="mission-form" novalidate>
+          <label for="objective">Objetivo de la misión:</label>
+          <textarea id="objective" name="objective" rows="4" placeholder="Ej.: Analizar rendimiento financiero de julio" required></textarea>
+          <div class="btn-row">
+            <button id="sendBtn" type="submit" class="btn-primary">Enviar Misión</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="column results">
+      <h2>Respuesta del Nexus</h2>
+      <div id="response" class="response-area" aria-live="polite">
+        <em>Esperando nueva misión...</em>
+      </div>
+    </section>
+
+    <section class="column diagnostics">
+      <h2>Panel de Diagnóstico</h2>
+      <pre id="diagnostics" class="diagnostics-area" aria-live="polite"></pre>
+    </section>
+  </main>
+
+  <footer class="main-footer">
+    <p>Monitor MVP · Versión Funcional 1.1 · 2025</p>
+  </footer>
+  <script src="client.js"></script>
+</body>
+</html>
