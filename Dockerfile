@@ -1,35 +1,34 @@
-# F2.DUV-035 · Proto-Nexus · Dockerfile
-# Construcción de PocketBase sobre Fly.io bajo principios de Costo Cero
+# ===============================
+# Dockerfile para PocketBase en Render (Free Tier)
+# Versión: F2.DOCKER.PB.R1
+# ===============================
 
-# Imagen base ligera, gratuita y mantenida
-FROM debian:bullseye-slim
+# Imagen base mínima y gratuita
+FROM alpine:3.20
 
-# Definimos la versión de PocketBase a instalar
+# Establecer variables de entorno
 ENV PB_VERSION=0.22.14
 
-# Instalamos dependencias mínimas y descargamos PocketBase
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates unzip \
-    && rm -rf /var/lib/apt/lists/* \
-    \
+# Crear usuario no root por seguridad
+RUN addgroup -S pbgroup && adduser -S pbuser -G pbgroup
+
+# Instalar dependencias necesarias y descargar PocketBase
+RUN apk add --no-cache curl unzip \
     && curl -L -o /tmp/pb.zip "https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip" \
     && unzip /tmp/pb.zip -d /pb \
-    && rm /tmp/pb.zip \
-    \
-    # Crear usuario sin privilegios para seguridad de costo cero
-    && useradd --system --user-group --shell /bin/false nonroot
+    && rm /tmp/pb.zip
 
-# Crear directorio de datos y asignar permisos
-RUN mkdir -p /pb/pb_data && chown -R nonroot:nonroot /pb
+# Crear directorio de datos con permisos adecuados
+RUN mkdir -p /pb/pb_data && chown -R pbuser:pbgroup /pb /pb/pb_data
 
-# Cambiar a usuario no root
-USER nonroot
+# Cambiar a usuario no privilegiado
+USER pbuser
 
 # Directorio de trabajo
 WORKDIR /pb
 
-# Puerto de PocketBase
+# Exponer el puerto por defecto de PocketBase
 EXPOSE 8090
 
-# Comando de inicio
-CMD ["./pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb/pb_data"]
+# Definir el comando de inicio
+CMD ["./pocketbase", "serve", "--http", "0.0.0.0:8090", "--dir", "/pb/pb_data"]

@@ -1,0 +1,22 @@
+# ===============================
+# render.yaml para PocketBase en Render (Free Tier)
+# Versión: F2.RENDER.PB.R1
+# ===============================
+
+services:
+  - type: web
+    name: proto-nexus-soberano
+    env: docker
+    plan: free # Define explícitamente el plan gratuito
+    autoDeploy: false # Despliegues manuales para máximo control
+
+    # Montaje de almacenamiento persistente gratuito (hasta 1GB)
+    disk:
+      name: pb-data
+      mountPath: /pb/pb_data
+      sizeGB: 1
+
+    # Auto-suspensión para mantener la Ley de Cero Costo
+    scaling:
+      minInstances: 0   # Permitir suspensión automática a cero
+      maxInstances: 1   # Limitar a una única instancia gratuita
