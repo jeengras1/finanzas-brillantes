@@ -1,12 +1,14 @@
-# DUV-040 • Proto-Nexus v2 • Render Blueprint
-# Define un Web Service (Node.js) y una Base de Datos PostgreSQL, ambos en plan Free.
+# =============================================================
+# render.yaml (CORREGIDO) para Cero Costo en Render
+# Versión: F2.RENDER.PB.R2
+# =============================================================
 
 services:
   - type: web
     name: proto-nexus-web
     env: node
     plan: free
-    autoDeploy: false # Despliegues manuales para máximo control
+    autoDeploy: false
     buildCommand: "npm install"
     startCommand: "node index.js"
     envVars:
@@ -15,9 +17,6 @@ services:
         fromDatabase:
           name: proto-nexus-db
           property: connectionString
-    scaling:
-      minInstances: 0 # Permite suspensión por inactividad para Cero Costo
-      maxInstances: 1
 
 databases:
   - name: proto-nexus-db
