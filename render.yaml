@@ -1,22 +1,24 @@
-# ===============================
-# render.yaml para PocketBase en Render (Free Tier)
-# Versión: F2.RENDER.PB.R1
-# ===============================
+# DUV-040 • Proto-Nexus v2 • Render Blueprint
+# Define un Web Service (Node.js) y una Base de Datos PostgreSQL, ambos en plan Free.
 
 services:
   - type: web
-    name: proto-nexus-soberano
-    env: docker
-    plan: free # Define explícitamente el plan gratuito
+    name: proto-nexus-web
+    env: node
+    plan: free
     autoDeploy: false # Despliegues manuales para máximo control
-
-    # Montaje de almacenamiento persistente gratuito (hasta 1GB)
-    disk:
-      name: pb-data
-      mountPath: /pb/pb_data
-      sizeGB: 1
-
-    # Auto-suspensión para mantener la Ley de Cero Costo
+    buildCommand: "npm install"
+    startCommand: "node index.js"
+    envVars:
+      # DATABASE_URL se inyecta desde la BD Free definida abajo
+      - key: DATABASE_URL
+        fromDatabase:
+          name: proto-nexus-db
+          property: connectionString
     scaling:
-      minInstances: 0   # Permitir suspensión automática a cero
-      maxInstances: 1   # Limitar a una única instancia gratuita
+      minInstances: 0 # Permite suspensión por inactividad para Cero Costo
+      maxInstances: 1
+
+databases:
+  - name: proto-nexus-db
+    plan: free
