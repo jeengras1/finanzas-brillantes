@@ -1,7 +1,7 @@
 {
   "name": "proto-nexus-v2",
-  "version": "1.0.0",
-  "type": "commonjs",
+  "version": "1.0.1",
+  "description": "Backend para el Proto-Nexus Soberano",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -10,7 +10,10 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@octokit/auth-app": "^7.1.0",
+    "@octokit/rest": "^20.1.1",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.5"
   }
 }
