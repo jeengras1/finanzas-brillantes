@@ -17,6 +17,18 @@ const {
   GITHUB_REPO_NAME
 } = process.env;
 
+// --- DIAGNÓSTICO TEMPORAL DE CLAVE ---
+console.log("--- Diagnóstico de Clave Privada (al arrancar) ---");
+if (GITHUB_PRIVATE_KEY) {
+    console.log("Clave privada detectada. Longitud:", GITHUB_PRIVATE_KEY.length);
+    console.log("Formato original (primeros 60 chars):", GITHUB_PRIVATE_KEY.substring(0, 60));
+    console.log("Contiene '\\n' literal:", GITHUB_PRIVATE_KEY.includes('\\n'));
+} else {
+    console.log("ALERTA: GITHUB_PRIVATE_KEY no fue encontrada en el entorno.");
+}
+console.log("-------------------------------------------------");
+// --- FIN DIAGNÓSTICO ---
+
 // --- FUNCIÓN DE CONEXIÓN A LA BASE DE DATOS ---
 const pool = new Pool({
   connectionString: DATABASE_URL,
@@ -35,11 +47,12 @@ const initDb = async () => {
   console.log("Base de datos y tabla 'misiones' verificadas.");
 };
 
-// --- FUNCIÓN DE AUTENTICACIÓN CON GITHUB ---
+// --- FUNCIÓN DE AUTENTICACIÓN CON GITHUB (CON CORRECCIÓN) ---
 async function getAuthenticatedOctokit() {
   const auth = createAppAuth({
     appId: GITHUB_APP_ID,
-    privateKey: GITHUB_PRIVATE_KEY,
+    // LA CORRECCIÓN: Reemplaza '\\n' por un salto de línea real.
+    privateKey: GITHUB_PRIVATE_KEY.replace(/\\n/g, '\n'),
     installationId: GITHUB_INSTALLATION_ID,
   });
   const installationAuth = await auth({ type: "installation" });
@@ -52,7 +65,6 @@ app.get("/", (_req, res) => {
 });
 
 app.post("/misiones", async (req, res) => {
-  // (Este es el endpoint que ya funciona para crear misiones)
   try {
     const { objetivo } = req.body;
     if (!objetivo || typeof objetivo !== 'string') {
@@ -69,7 +81,6 @@ app.post("/misiones", async (req, res) => {
   }
 });
 
-// --- NUEVO ENDPOINT PARA LA PRUEBA DE FUEGO ---
 app.post("/archivar-mision-prueba", async (req, res) => {
   try {
     console.log("Iniciando prueba de archivado en GitHub...");
@@ -97,8 +108,8 @@ app.post("/archivar-mision-prueba", async (req, res) => {
 
 // --- INICIO DEL SERVIDOR ---
 initDb().then(() => {
-  app.listen(PORT || 3000, () => {
-    console.log(`Proto-Nexus v2 escuchando en el puerto ${PORT || 3000}`);
+  app.listen(process.env.PORT || 3000, () => {
+    console.log(`Proto-Nexus v2 escuchando en el puerto ${process.env.PORT || 3000}`);
   });
 }).catch(err => {
     console.error("Fallo al inicializar la base de datos:", err);
