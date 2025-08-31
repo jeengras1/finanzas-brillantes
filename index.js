@@ -1,117 +1,62 @@
-const express = require("express");
-const { Pool } = require("pg");
-const { createAppAuth } = require("@octokit/auth-app");
-const { Octokit } = require("@octokit/rest");
+import express from 'express';
+import { Pool } from 'pg';
+import { Octokit } from '@octokit/rest';
+import { createAppAuth } from '@octokit/auth-app';
 
 const app = express();
 app.use(express.json());
 
-// --- SECCIÓN DE VARIABLES DE ENTORNO ---
-const {
-  DATABASE_URL,
-  PORT,
-  GITHUB_APP_ID,
-  GITHUB_INSTALLATION_ID,
-  GITHUB_PRIVATE_KEY,
-  GITHUB_REPO_OWNER,
-  GITHUB_REPO_NAME
-} = process.env;
+const { GITHUB_APP_ID, GITHUB_INSTALLATION_ID, GITHUB_PRIVATE_KEY, GITHUB_REPO_OWNER, GITHUB_REPO_NAME = 'finanzas-brillantes' } = process.env;
 
-// --- DIAGNÓSTICO TEMPORAL DE CLAVE ---
-console.log("--- Diagnóstico de Clave Privada (al arrancar) ---");
-if (GITHUB_PRIVATE_KEY) {
-    console.log("Clave privada detectada. Longitud:", GITHUB_PRIVATE_KEY.length);
-    console.log("Formato original (primeros 60 chars):", GITHUB_PRIVATE_KEY.substring(0, 60));
-    console.log("Contiene '\\n' literal:", GITHUB_PRIVATE_KEY.includes('\\n'));
-} else {
-    console.log("ALERTA: GITHUB_PRIVATE_KEY no fue encontrada en el entorno.");
+async function getInstallationOctokit() {
+  if (!GITHUB_APP_ID || !GITHUB_INSTALLATION_ID || !GITHUB_PRIVATE_KEY || !GITHUB_REPO_OWNER) {
+    throw new Error('Faltan una o más variables de entorno de GitHub.');
+  }
+  const auth = createAppAuth({
+    appId: parseInt(GITHUB_APP_ID, 10),
+    privateKey: GITHUB_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    installationId: parseInt(GITHUB_INSTALLATION_ID, 10)
+  });
+  const { token } = await auth({ type: 'installation' });
+  return new Octokit({ auth: token });
 }
-console.log("-------------------------------------------------");
-// --- FIN DIAGNÓSTICO ---
 
-// --- FUNCIÓN DE CONEXIÓN A LA BASE DE DATOS ---
 const pool = new Pool({
-  connectionString: DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
-const initDb = async () => {
+const init = async () => {
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS misiones (
-      id SERIAL PRIMARY KEY,
-      objetivo TEXT NOT NULL,
-      estado VARCHAR(32) NOT NULL DEFAULT 'nueva',
-      creado_en TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-    );
+    CREATE TABLE IF NOT EXISTS misiones ( id SERIAL PRIMARY KEY, objetivo TEXT NOT NULL, estado VARCHAR(32) DEFAULT 'nueva', creado_en TIMESTAMPTZ DEFAULT NOW() );
   `);
-  console.log("Base de datos y tabla 'misiones' verificadas.");
+  console.log("✅ Tabla 'misiones' lista.");
 };
 
-// --- FUNCIÓN DE AUTENTICACIÓN CON GITHUB (CON CORRECCIÓN) ---
-async function getAuthenticatedOctokit() {
-  const auth = createAppAuth({
-    appId: GITHUB_APP_ID,
-    // LA CORRECCIÓN: Reemplaza '\\n' por un salto de línea real.
-    privateKey: GITHUB_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    installationId: GITHUB_INSTALLATION_ID,
-  });
-  const installationAuth = await auth({ type: "installation" });
-  return new Octokit({ auth: installationAuth.token });
-}
-
-// --- ENDPOINTS DE LA API ---
-app.get("/", (_req, res) => {
-  res.json({ ok: true, servicio: "proto-nexus-web", status: "operativo" });
-});
-
-app.post("/misiones", async (req, res) => {
+app.post('/archivar-mision-prueba', async (req, res) => {
   try {
-    const { objetivo } = req.body;
-    if (!objetivo || typeof objetivo !== 'string') {
-      return res.status(400).json({ error: "Campo 'objetivo' es requerido." });
-    }
-    const result = await pool.query(
-      "INSERT INTO misiones (objetivo) VALUES ($1) RETURNING *;",
-      [objetivo]
-    );
-    return res.status(201).json({ mision: result.rows[0] });
-  } catch (err) {
-    console.error("Error en POST /misiones:", err);
-    return res.status(500).json({ error: "Error interno del servidor." });
-  }
-});
-
-app.post("/archivar-mision-prueba", async (req, res) => {
-  try {
-    console.log("Iniciando prueba de archivado en GitHub...");
-    const octokit = await getAuthenticatedOctokit();
-    const filePath = `actas/acta-prueba-${Date.now()}.md`;
-    const content = Buffer.from("Prueba de escritura autónoma del Nexus exitosa.").toString("base64");
-    
-    const { data } = await octokit.repos.createOrUpdateFileContents({
+    const octokit = await getInstallationOctokit();
+    const path = `actas/acta-prueba-${Date.now()}.md`;
+    const content = Buffer.from('Prueba de escritura autónoma desde Nexus v2 (ESM)').toString('base64');
+    const result = await octokit.rest.repos.createOrUpdateFileContents({
       owner: GITHUB_REPO_OWNER,
       repo: GITHUB_REPO_NAME,
-      path: filePath,
-      message: "COMMIT AUTÓNOMO: Prueba de escritura del Nexus",
-      content: content,
-      committer: { name: "Nexus-Soberano-Bot", email: "bot@nexus.dev" },
-      author: { name: "Nexus-Soberano-Bot", email: "bot@nexus.dev" },
+      path,
+      message: 'Acta de prueba automática (ESM)',
+      content,
+      committer: { name: 'Nexus Bot', email: 'bot@nexus.dev' },
+      author: { name: 'Nexus Bot', email: 'bot@nexus.dev' }
     });
-
-    console.log("Archivo creado exitosamente en GitHub.");
-    return res.status(201).json({ ok: true, message: "Archivo de prueba creado en GitHub.", url: data.content.html_url });
-  } catch (error) {
-    console.error("Error en /archivar-mision-prueba:", error.message);
-    return res.status(500).json({ ok: false, error: "Fallo al escribir en GitHub.", details: error.message });
+    res.json({ ok: true, url: result.data.content.html_url });
+  } catch (err) {
+    console.error('❌ Error en /archivar-mision-prueba:', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
-// --- INICIO DEL SERVIDOR ---
-initDb().then(() => {
-  app.listen(process.env.PORT || 3000, () => {
-    console.log(`Proto-Nexus v2 escuchando en el puerto ${process.env.PORT || 3000}`);
+const PORT = process.env.PORT || 3000;
+init().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Nexus activo en modo ESM en puerto ${PORT}`);
   });
-}).catch(err => {
-    console.error("Fallo al inicializar la base de datos:", err);
-    process.exit(1);
 });
