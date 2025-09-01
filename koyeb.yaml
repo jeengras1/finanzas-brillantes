@@ -1,0 +1,20 @@
+# Nombre de la aplicación en Koyeb
+name: finanzas-brillantes
+
+# Definición de los servicios
+services:
+  # Nuestro servicio de IA soberana
+  - name: nexus-ia
+    # Usaremos el Dockerfile que acabamos de crear
+    docker:
+      dockerfile: Dockerfile
+    # Configuración de la instancia (la gratuita)
+    instance_class: free
+    # Hacemos que el servicio sea público en internet
+    ports:
+      - port: 11434
+        protocol: http
+    # Aseguramos que el servicio esté disponible en internet
+    routes:
+      - path: /
+        port: 11434
