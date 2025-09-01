@@ -1,4 +1,4 @@
-name: 1. Corte Suprema - Validador Constitucional (v4 - Soberano)
+name: 1. Corte Suprema - Validador Constitucional (v5 - Autosuficiente)
 
 on:
   pull_request:
@@ -14,40 +14,50 @@ jobs:
       - name: 1. Checkout del código del proyecto
         uses: actions/checkout@v4
 
-      - name: 2. Realizar Validación con IA Soberana (Ollama)
+      # --- !! INICIO DE LA REPARACIÓN !! ---
+      - name: 2. Instalar Inspector de IA Soberano (Ollama)
+        run: |
+          # Descargar e instalar el motor de IA
+          curl -fsSL https://ollama.com/install.sh | sh
+          
+          # Descargar un modelo de IA potente y ligero (Phi-3, ~2.2GB RAM)
+          ollama pull phi3:3.8b
+
+      - name: 3. Iniciar Servicio de IA y Verificar
+        run: |
+          # Iniciar el servicio en segundo plano para que el resto del script continúe
+          ollama serve &
+
+          # Esperar 15 segundos para asegurar que el servicio esté completamente listo
+          sleep 15
+      # --- !! FIN DE LA REPARACIÓN !! ---
+
+      - name: 4. Realizar Validación con IA Soberana
         uses: actions/github-script@v7
         with:
           script: |
             const { owner, repo, number } = context.issue;
             const fs = require('fs');
-            const { execSync } = require('child_process');
 
-            // --- 1. Leer los Documentos ---
+            // --- Leer Documentos ---
             const leyDeMision = fs.readFileSync('constitucion/LEY-02-MISION.md', 'utf8');
             const pr = await github.rest.pulls.get({ owner, repo, pull_number: number });
             const propuesta = pr.data.body || "El cuerpo de la propuesta está vacío.";
             
-            // --- 2. Iniciar el servicio de IA Soberana en segundo plano ---
-            console.log("Iniciando el servicio de IA Soberana (Ollama)...");
-            execSync('ollama serve &');
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Esperar 5s para que inicie
-
-            // --- 3. Preparar el Caso para la IA ---
+            // --- Preparar Caso para la IA ---
             const prompt = `
-              Eres el Abogado Constitucional de un proyecto. Tu misión es validar si una nueva propuesta se alinea con la Ley de Misión.
+              Eres el Abogado Constitucional. Valida si la propuesta se alinea con la Ley de Misión.
               **LEY DE MISIÓN:**\n---\n${leyDeMision}\n---\n
               **NUEVA PROPUESTA:**\n---\n${propuesta}\n---\n
               **VEREDICTO:**
               Responde con un análisis corto. Empieza con "VEREDICTO:" y di si se ALINEA o DESALINEA y por qué.
             `;
 
-            // --- 4. Enviar el caso a nuestra IA interna ---
-            console.log("Enviando caso a la IA Soberana...");
+            // --- Enviar caso a nuestra IA interna ---
             const response = await fetch('http://localhost:11434/api/generate', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                model: 'llama3',
+                model: 'phi-3:3.8b', // Usamos el modelo ligero que descargamos
                 prompt: prompt,
                 stream: false
               })
@@ -55,10 +65,10 @@ jobs:
             const data = await response.json();
             const veredictoIA = data.response;
 
-            // --- 5. Publicar el Veredicto de la IA ---
+            // --- Publicar Veredicto ---
             const comentarioFinal = `
-              🏛️ **Veredicto de la Corte Suprema (v4 - Soberana)** 🏛️\n\n
-              Se ha consultado a nuestro **Inspector de Planta Interno (Nexus v2)**.\n\n
+              🏛️ **Veredicto de la Corte Suprema (v5 - Autosuficiente)** 🏛️\n\n
+              Se ha consultado a nuestro **Inspector Interno (Nexus v2 - Phi-3)**.\n\n
               **Análisis del Abogado Constitucional:**\n> ${veredictoIA}
             `;
             await github.rest.issues.createComment({ owner, repo, issue_number: number, body: comentarioFinal });
