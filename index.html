@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitor del Director</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #f9f9f9; }
+    input, button { padding: 0.5em; font-size: 1em; margin-right: 0.5em; }
+    #resultado { margin-top: 1em; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🧭 Monitor del Director</h1>
+  <form id="orden-form">
+    <input type="text" id="orden-texto" placeholder="Escribe tu orden aquí..." required />
+    <button type="submit">Enviar Orden</button>
+  </form>
+  <div id="resultado"></div>
+
+  <script type="module">
+    import { Octokit } from "https://cdn.skypack.dev/@octokit/rest";
+
+    const octokit = new Octokit({ auth: 'ghp_REEMPLAZAR_CON_TOKEN' });
+
+    document.getElementById("orden-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const orden = document.getElementById("orden-texto").value;
+
+      try {
+        const issue = await octokit.rest.issues.create({
+          owner: "jeengras1",
+          repo: "finanzas-brillantes",
+          title: `Orden del Director: ${orden}`,
+          body: `🧠 Nexus, ejecuta la siguiente orden:\n\n${orden}`
+        });
+
+        document.getElementById("resultado").innerText =
+          `✅ Orden enviada como Issue #${issue.data.number}`;
+      } catch (error) {
+        document.getElementById("resultado").innerText =
+          `❌ Error: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
