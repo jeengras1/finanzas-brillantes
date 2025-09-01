@@ -1,0 +1,36 @@
+# Nombre oficial de nuestra Corte Suprema
+name: 1. Corte Suprema - Validador Constitucional
+
+# La regla que le dice al motor CUÁNDO encenderse
+# En este caso, cada vez que haya una nueva "propuesta de cambio" (Pull Request)
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+# La lista de tareas que debe realizar
+jobs:
+  inspeccion-inicial:
+    # Usará una máquina virtual limpia de Ubuntu para trabajar
+    runs-on: ubuntu-latest
+    
+    # La secuencia de pasos a seguir
+    steps:
+      # Paso 1: Imprime un mensaje simple para confirmar que se activó
+      - name: 🏁 La Corte Suprema ha iniciado sesión.
+        run: echo "Iniciando inspección automática del cambio propuesto..."
+
+      # Paso 2: Simula el análisis de un experto (por ahora, solo escribe un mensaje)
+      - name: 🕵️‍♀️ Simulando análisis del Consorcio de IAs...
+        run: echo "Los expertos están revisando el caso. Pronto emitirán un veredicto."
+        
+      # Este es el paso que publicará el comentario en el Pull Request
+      - name: 🗣️ Publicar Veredicto Inicial en el Pull Request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: "🏛️ **Veredicto de la Corte Suprema** 🏛️\n\n¡Hola Director! Hemos recibido tu propuesta de cambio. La Mesa de Trabajo Automática se ha activado correctamente.\n\n*Próximamente, aquí aparecerá el análisis real de Nexus con su **Luz Verde, Amarilla o Roja**.*"
+            })
