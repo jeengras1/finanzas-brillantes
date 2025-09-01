@@ -1,62 +1,53 @@
-import express from 'express';
+// index.js (Versión Reparada y Blindada)
 import { Pool } from 'pg';
-import { Octokit } from '@octokit/rest';
-import { createAppAuth } from '@octokit/auth-app';
+import express from 'express';
 
-const app = express();
-app.use(express.json());
+// Variable para la base de datos
+let pool;
 
-const { GITHUB_APP_ID, GITHUB_INSTALLATION_ID, GITHUB_PRIVATE_KEY, GITHUB_REPO_OWNER, GITHUB_REPO_NAME = 'finanzas-brillantes' } = process.env;
+// Función de inicialización
+async function init() {
+  console.log("Iniciando Nexus Financiero v2.0.1...");
 
-async function getInstallationOctokit() {
-  if (!GITHUB_APP_ID || !GITHUB_INSTALLATION_ID || !GITHUB_PRIVATE_KEY || !GITHUB_REPO_OWNER) {
-    throw new Error('Faltan una o más variables de entorno de GitHub.');
+  // --- !! INICIO DE LA REPARACIÓN !! ---
+  // Comprobamos si el Director dio la orden de omitir la base de datos.
+  if (process.env.OMIT_DB === 'true') {
+    console.warn("⚠️  Modo SIN ESTADO activado. Omitiendo conexión a la base de datos.");
+    // Dejamos el 'pool' como nulo. El resto del código deberá manejar esto.
+  } else if (process.env.DATABASE_URL) {
+    console.log("✅ DATABASE_URL encontrada. Conectando a la base de datos PostgreSQL...");
+    try {
+      pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+          rejectUnauthorized: false
+        }
+      });
+      // Hacemos una consulta de prueba para verificar la conexión
+      await pool.query('SELECT NOW()');
+      console.log("✅ Conexión a la base de datos establecida con éxito.");
+    } catch (err) {
+      console.error("❌ ERROR CRÍTICO al conectar a la base de datos:", err);
+      // Si la conexión falla, detenemos el proceso para evitar más errores.
+      process.exit(1);
+    }
+  } else {
+    console.error("❌ ERROR CRÍTICO: No se encontró la variable DATABASE_URL y el modo SIN ESTADO no está activado.");
+    process.exit(1);
   }
-  const auth = createAppAuth({
-    appId: parseInt(GITHUB_APP_ID, 10),
-    privateKey: GITHUB_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    installationId: parseInt(GITHUB_INSTALLATION_ID, 10)
+  // --- !! FIN DE LA REPARACIÓN !! ---
+
+  const app = express();
+  const port = process.env.PORT || 8080;
+
+  app.get('/', (req, res) => {
+    const status = pool ? 'Conectado a la base de datos.' : 'Operando en modo sin estado.';
+    res.send(`Servicio Nexus Financiero operativo. ${status}`);
   });
-  const { token } = await auth({ type: 'installation' });
-  return new Octokit({ auth: token });
+
+  app.listen(port, () => {
+    console.log(`🚀 Servidor escuchando en el puerto ${port}`);
+  });
 }
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
-const init = async () => {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS misiones ( id SERIAL PRIMARY KEY, objetivo TEXT NOT NULL, estado VARCHAR(32) DEFAULT 'nueva', creado_en TIMESTAMPTZ DEFAULT NOW() );
-  `);
-  console.log("✅ Tabla 'misiones' lista.");
-};
-
-app.post('/archivar-mision-prueba', async (req, res) => {
-  try {
-    const octokit = await getInstallationOctokit();
-    const path = `actas/acta-prueba-${Date.now()}.md`;
-    const content = Buffer.from('Prueba de escritura autónoma desde Nexus v2 (ESM)').toString('base64');
-    const result = await octokit.rest.repos.createOrUpdateFileContents({
-      owner: GITHUB_REPO_OWNER,
-      repo: GITHUB_REPO_NAME,
-      path,
-      message: 'Acta de prueba automática (ESM)',
-      content,
-      committer: { name: 'Nexus Bot', email: 'bot@nexus.dev' },
-      author: { name: 'Nexus Bot', email: 'bot@nexus.dev' }
-    });
-    res.json({ ok: true, url: result.data.content.html_url });
-  } catch (err) {
-    console.error('❌ Error en /archivar-mision-prueba:', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-init().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Nexus activo en modo ESM en puerto ${PORT}`);
-  });
-});
+init();
