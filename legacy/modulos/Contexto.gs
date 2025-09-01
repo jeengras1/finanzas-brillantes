@@ -1,1 +1,0 @@
-// ... (código de Contexto.gs)
