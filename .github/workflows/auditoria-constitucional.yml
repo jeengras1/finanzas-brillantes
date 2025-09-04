@@ -1,0 +1,26 @@
+name: 🏛️ Auditoría Constitucional
+on:
+  pull_request:
+    paths: ['dossier/**']
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  validar-documentacion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Ejecutar validador de documentos
+        run: node scripts/operativos/validar-dossier.js
+      - name: Publicar Reporte de Auditoría
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ **Auditoría Constitucional Aprobada:** Los documentos en este PR cumplen con el formato estándar.'
+            });
