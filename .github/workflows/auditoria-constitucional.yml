@@ -1,26 +1,46 @@
-name: 🏛️ Auditoría Constitucional
+name: 🏛️ Auditor Constitucional
 on:
   pull_request:
     paths: ['dossier/**']
+
 permissions:
   contents: read
   pull-requests: write
+
 jobs:
   validar-documentacion:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - name: Ejecutar validador de documentos
-        run: node scripts/operativos/validar-dossier.js
-      - name: Publicar Reporte de Auditoría
-        if: success()
+      - name: 1. Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necesario para comparar cambios
+
+      - name: 2. Identificar archivos modificados
+        id: changed-files
+        run: |
+          # Compara la rama actual con la rama principal para encontrar archivos modificados
+          FILES=$(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} -- 'dossier/**.md')
+          echo "files=${FILES}" >> $GITHUB_ENV
+
+      - name: 3. Ejecutar validador de documentos
+        if: env.files != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node scripts/operativos/validar-dossier.js
+        if: env.files != ''
+        env:
+          MODIFIED_FILES: ${{ env.files }}
+
+      - name: 4. Publicar Reporte de Auditoría
+        if: success() && env.files != ''
         uses: actions/github-script@v7
         with:
           script: |
             github.rest.issues.createComment({
-              owner: context.repo.owner, repo: context.repo.repo,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: '✅ **Auditoría Constitucional Aprobada:** Los documentos en este PR cumplen con el formato estándar.'
+              body: '✅ **Auditoría Constitucional Aprobada:** Los documentos modificados en este PR cumplen con el formato estándar.'
             });
