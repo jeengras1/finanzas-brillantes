@@ -1,0 +1,44 @@
+name: 🏛️ Corte Suprema Constitucional
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  procesar-orden:
+    # Blindaje: Solo se activa si el autor es el dueño y la etiqueta es correcta
+    if: github.event.issue.author_association == 'OWNER' && contains(github.event.issue.labels.*.name, 'orden-recibida')
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Acuse de Recibo Constitucional
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Validación Constitucional Inmediata
+            const orden = context.payload.issue.body;
+            if (!orden || orden.length < 20) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number,
+                body: `❌ **Veredicto de la Corte:** ORDEN RECHAZADA.\n\n**Razón:** La descripción de la orden es demasiado corta o está vacía, violando el principio de claridad de la LEY-04. Por favor, edite la orden para que sea más explícita.`
+              });
+              throw new Error('Orden inválida.');
+            }
+
+            // Si es válida, procede
+            const body = `🏛️ **Corte Suprema**\n\n✅ Orden **#${context.issue.number}** recibida y validada preliminarmente contra la LEY-04.\n\nEl expediente ha sido abierto. Nexus iniciará el protocolo de deliberación.`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body: body
+            });
+
+      - name: 2. Actualizar Estado de la Orden
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, name: 'orden-recibida'
+            });
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, labels: ['nexus-en-proceso']
+            });

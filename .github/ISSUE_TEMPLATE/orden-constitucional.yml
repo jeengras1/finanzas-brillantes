@@ -1,0 +1,20 @@
+name: "🎯 Orden Constitucional"
+description: "Emitir una nueva directiva para el sistema Nexus."
+title: "ORDEN: [Título breve de la orden]"
+labels: ["orden-recibida"]
+body:
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: "📝 Descripción Detallada de la Orden"
+      description: "Sea explícito en su directiva. ¿Qué debe hacer el sistema? ¿Cuál es el resultado esperado?"
+      placeholder: "Como Director, ordeno que Nexus investigue y proponga una nueva NORMA para..."
+    validations:
+      required: true
+  - type: dropdown
+    id: prioridad
+    attributes:
+      label: "Prioridad Constitucional"
+      options: ["BAJA", "MEDIA", "ALTA", "CRÍTICA"]
+    validations:
+      required: true
