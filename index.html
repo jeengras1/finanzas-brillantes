@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de IA Open-Source (Simulación)</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración de la fuente Inter -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilo para simular el brillo del monitor/terminal */
+        .ai-monitor {
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        }
+        /* Estilo para la animación de carga (cursor parpadeante) */
+        @keyframes blink-cursor {
+            from { border-right-color: rgba(0, 255, 0, 0.75); }
+            to { border-right-color: transparent; }
+        }
+        .blinking-cursor {
+            border-right: 2px solid rgba(0, 255, 0, 0.75);
+            animation: blink-cursor 0.7s step-end infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Contenedor Principal de la Aplicación -->
+    <div class="w-full max-w-4xl bg-gray-800 rounded-xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
+
+        <!-- Encabezado del Monitor -->
+        <header class="bg-gray-700 p-4 border-b-2 border-green-500/50">
+            <h1 class="text-2xl font-bold text-green-400">
+                <span class="mr-2 text-3xl">🤖</span> Proyecto Nexus
+                <span class="text-sm font-normal text-gray-400 block sm:inline-block sm:ml-4">
+                    Motor: Open-Source LLM (Llama/Mistral v3.4)
+                </span>
+            </h1>
+        </header>
+
+        <!-- Área del Monitor/Historial de Conversación -->
+        <div id="chat-monitor" class="flex-grow p-6 space-y-4 overflow-y-auto ai-monitor bg-gray-900/90" style="scrollbar-width: none;">
+            <!-- Mensaje de Bienvenida de la IA -->
+            <div class="flex justify-start">
+                <div class="bg-gray-700/50 p-3 rounded-lg max-w-[80%] shadow-lg">
+                    <p class="font-semibold text-green-400 mb-1">Nexus AI:</p>
+                    <p class="text-gray-200">
+                        Bienvenido al **Monitor de IA Open-Source**. Estoy lista para ayudarte. Puedes pedirme que simule tareas de código, análisis o creatividad.
+                        <br><br>
+                        Ejemplo: `Genera un plan de 5 pasos para aprender React.`
+                    </p>
+                </div>
+            </div>
+            <!-- Los mensajes se insertarán aquí por JavaScript -->
+        </div>
+
+        <!-- Caja de Escritura y Botón de Envío -->
+        <div class="p-4 bg-gray-700/70 border-t-2 border-green-500/50">
+            <div class="flex space-x-3">
+                <textarea
+                    id="user-input"
+                    class="flex-grow p-3 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none h-12 overflow-hidden"
+                    placeholder="Escribe tu consulta o comando aquí..."
+                    rows="1"
+                    oninput="autoExpand(this)"
+                    onkeydown="handleKeyDown(event)"
+                ></textarea>
+                <button
+                    id="send-button"
+                    onclick="sendMessage()"
+                    class="flex-shrink-0 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-md shadow-green-500/50 disabled:bg-gray-500 disabled:shadow-none mt-1 sm:mt-0"
+                    disabled
+                >
+                    Enviar
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const chatMonitor = document.getElementById('chat-monitor');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        let isResponding = false;
+        
+        // Función para expandir automáticamente el textarea
+        function autoExpand(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight) + 'px';
+            
+            // Habilitar/Deshabilitar el botón de enviar
+            sendButton.disabled = textarea.value.trim() === '' || isResponding;
+        }
+
+        // Manejar la pulsación de la tecla Enter
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); // Evita el salto de línea por defecto
+                if (!sendButton.disabled) {
+                    sendMessage();
+                }
+            }
+        }
+
+        // Función para crear un nuevo elemento de mensaje
+        function createMessageElement(isUser, content, isThinking = false) {
+            const wrapper = document.createElement('div');
+            wrapper.className = \`flex \${isUser ? 'justify-end' : 'justify-start'}\`;
+
+            const bubble = document.createElement('div');
+            bubble.className = \`p-3 rounded-xl max-w-[80%] shadow-xl transition-all duration-300 \${
+                isUser 
+                ? 'bg-blue-600/80 text-white' 
+                : 'bg-gray-700/50 text-gray-200'
+            }\`;
+            
+            const header = document.createElement('p');
+            header.className = \`font-bold mb-1 \${isUser ? 'text-blue-200' : 'text-green-400'}\`;
+            header.textContent = isUser ? 'Tú:' : 'Nexus AI:';
+            bubble.appendChild(header);
+
+            const contentElement = document.createElement('p');
+            contentElement.innerHTML = content;
+            bubble.appendChild(contentElement);
+
+            if (isThinking) {
+                contentElement.classList.add('blinking-cursor');
+            }
+
+            wrapper.appendChild(bubble);
+            chatMonitor.appendChild(wrapper);
+
+            // Asegurar que el scroll esté siempre abajo
+            chatMonitor.scrollTop = chatMonitor.scrollHeight;
+            return contentElement; // Devolvemos el elemento de contenido para la animación de escritura
+        }
+
+        // Función de simulación de respuesta de la IA
+        async function simulateResponse(userMessage) {
+            isResponding = true;
+            sendButton.disabled = true;
+            userInput.classList.add('opacity-50');
+
+            const thinkingElement = createMessageElement(false, '...');
+            
+            // Simular un tiempo de procesamiento
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            thinkingElement.classList.remove('blinking-cursor');
+
+            const responseText = getSimulatedResponse(userMessage);
+
+            await typeTextEffect(thinkingElement, responseText, 25);
+            
+            isResponding = false;
+            sendButton.disabled = userInput.value.trim() === '';
+            userInput.classList.remove('opacity-50');
+            userInput.focus();
+        }
+
+        // Efecto de escritura token por token
+        function typeTextEffect(element, text, delay = 50) {
+            return new Promise(resolve => {
+                let i = 0;
+                element.innerHTML = '';
+                element.classList.add('blinking-cursor');
+
+                function type() {
+                    if (i < text.length) {
+                        element.innerHTML += text.charAt(i);
+                        i++;
+                        chatMonitor.scrollTop = chatMonitor.scrollHeight; // Mantener scroll
+                        setTimeout(type, delay);
+                    } else {
+                        element.classList.remove('blinking-cursor');
+                        resolve();
+                    }
+                }
+                type();
+            });
+        }
+
+        // Lógica de respuesta simulada
+        function getSimulatedResponse(message) {
+            const lowerMsg = message.toLowerCase();
+
+            if (lowerMsg.includes('plan de 5 pasos para aprender react')) {
+                return \`¡Excelente elección! React es fundamental. Aquí tienes un plan basado en los principios de aprendizaje de la comunidad open-source:
+
+                1. **Fundamentos de JavaScript Moderno (ES6+):** Repasa 'let', 'const', arrow functions, promesas y async/await. Sin esto, React será confuso.
+                2. **Componentes y Props:** Entiende la diferencia entre componentes de clase y funcionales (prioriza funcionales) y cómo pasar datos con 'props'.
+                3. **Hooks Esenciales (useState y useEffect):** Domina cómo gestionar el estado y los efectos secundarios. Es la base de la programación funcional en React.
+                4. **Manejo de Rutas y Fetching de Datos:** Aprende a usar un router (como React Router Dom) y cómo integrar APIs externas usando 'fetch' o Axios.
+                5. **Manejo de Estado Avanzado:** Explora Context API o una librería como Redux/Zustand para manejar estados globales complejos. ¡Práctica con proyectos pequeños!\`;
+            } else if (lowerMsg.includes('código') || lowerMsg.includes('code')) {
+                return \`Simulación de Generación de Código (Python):
+
+                \`\`\`python
+                # Definición de un generador de Fibonacci (código abierto y limpio)
+                def fibonacci_generator(limit):
+                    a, b = 0, 1
+                    while a < limit:
+                        yield a
+                        a, b = b, a + b
+
+                # Uso del generador
+                for number in fibonacci_generator(100):
+                    print(number)
+                \`\`\`
+                Este es un ejemplo de código eficiente y legible. ¿Qué otro lenguaje o algoritmo te gustaría ver?\`;
+            } else if (lowerMsg.includes('hola') || lowerMsg.includes('saludo')) {
+                return \`¡Hola! Soy Nexus AI, lista para procesar tu siguiente consulta con un enfoque en la transparencia y la modularidad del código abierto. ¿En qué puedo ayudarte hoy?\`;
+            } else if (lowerMsg.includes('open-source') || lowerMsg.includes('código abierto')) {
+                return \`El concepto de código abierto es central para el avance de la IA. Modelos como Llama, Mistral y la suite de herramientas Hugging Face democratizan el acceso al conocimiento y permiten la auditoría y mejora continua por parte de la comunidad global. Esta filosofía impulsa la innovación de manera colaborativa.\`;
+            } else {
+                return \`**[PROCESANDO CONSULTA...]** He analizado tu entrada. Este es un desafío interesante que requiere una arquitectura LLM compleja. Como modelo de código abierto, mi respuesta simulada es: 'La complejidad intrínseca de esta consulta sugiere que la solución óptima se encuentra en la intersección de un Transformer con un mecanismo de atención distribuida. Se recomienda una reescritura modular y la optimización del kernel de inferencia.'\`;
+            }
+        }
+
+        // Función principal para enviar el mensaje
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '' || isResponding) return;
+
+            // 1. Mostrar el mensaje del usuario
+            createMessageElement(true, message);
+            
+            // 2. Limpiar la entrada y restablecer el tamaño
+            userInput.value = '';
+            userInput.style.height = '48px'; // Altura inicial de 12 (h-12)
+            sendButton.disabled = true;
+
+            // 3. Simular la respuesta de la IA
+            simulateResponse(message);
+        }
+
+        // Inicializar el botón de envío
+        window.onload = function() {
+            sendButton.disabled = true;
+            // Asegurar que el scroll esté abajo al cargar (por si hay historial, aunque aquí no lo hay)
+            chatMonitor.scrollTop = chatMonitor.scrollHeight;
+        };
+    </script>
+</body>
+</html>
