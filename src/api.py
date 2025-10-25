@@ -49,6 +49,9 @@ LLM_READY = False
 
 # --- FUNCIÓN DE INICIALIZACIÓN RAG ---
 
+# RUTA CORREGIDA: Usamos el directorio /tmp, donde Render permite la escritura
+CHROMA_PATH = "/tmp/chroma_db"
+
 def initialize_rag():
     global vectorstore, rag_chain, LLM_READY
     
@@ -60,7 +63,6 @@ def initialize_rag():
     print("Inicializando componentes RAG...")
     
     # 1. Carga de Documentos (de la carpeta 'docs' y archivos markdown en la raíz)
-    # Se añade un manejo de error para archivos binarios
     loader = DirectoryLoader(
         ".", 
         glob="**/*.md", 
@@ -88,8 +90,9 @@ def initialize_rag():
     EMBEDDINGS = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     
     # 4. Base de Datos Vectorial (ChromaDB)
-    CHROMA_PATH = "./data/chroma_db"
+    # Se añade la creación de la carpeta /tmp
     if not os.path.exists(CHROMA_PATH):
+        os.makedirs(CHROMA_PATH, exist_ok=True)
         print(f"-> [RAG Core] Documentos cargados: {len(texts)} chunks. Creando embeddings...")
         vectorstore = Chroma.from_documents(texts, EMBEDDINGS, persist_directory=CHROMA_PATH)
     else:
@@ -146,7 +149,7 @@ async def get_status():
         "status": "ready" if LLM_READY else "unconfigured",
         "llm": "Gemini 2.5 Flash",
         "embeddings": "all-MiniLM-L6-v2",
-        "docs_ready": LLM_READY and os.path.exists("./data/chroma_db")
+        "docs_ready": LLM_READY and os.path.exists(CHROMA_PATH)
     }
 
 
@@ -163,21 +166,20 @@ async def ask_ai(query: Query):
         # Ejecutar la cadena RAG. El ConversationalRetrievalChain maneja el historial.
         result = rag_chain.invoke({
             "question": query.question, 
-            "chat_history": [] # Se podría expandir para usar el historial del Query model
+            "chat_history": [] 
         })
         
         # Extraer las fuentes para citación
         sources = [
-            os.path.basename(doc.metadata['source']) # Solo el nombre del archivo
+            os.path.basename(doc.metadata['source']) 
             for doc in result.get('source_documents', [])
         ]
         
         return {
             "response": result['answer'],
-            "sources": list(set(sources)) # Devuelve solo fuentes únicas
+            "sources": list(set(sources)) 
         }
         
     except Exception as e:
         print(f"Error al procesar la query RAG: {e}")
-        # En caso de error de conexión con Gemini, etc.
         raise HTTPException(status_code=500, detail="Error interno del Cerebro RAG. Verifique la conexión a la API.")
