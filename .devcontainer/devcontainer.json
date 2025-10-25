@@ -2,7 +2,11 @@
     "name": "Nexus-OS Python RAG Environment",
     "image": "mcr.microsoft.com/devcontainers/python:3.11",
     "features": {
-        "ghcr.io/devcontainers/features/github-cli:1": {}
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        // **NUEVA CARACTERÍSTICA:** Añade soporte para Node.js (necesario para npm y gh-pages)
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "lts"
+        }
     },
     "customizations": {
         "vscode": {
@@ -10,6 +14,10 @@
                 "ms-python.python",
                 "ms-python.vscode-pylance"
             ]
+        },
+        // **NUEVA CONFIGURACIÓN:** Cambia el terminal a Zsh para evitar errores de sintaxis
+        "settings": {
+            "terminal.integrated.defaultProfile.linux": "zsh"
         }
     },
     // Ejecuta la instalación de paquetes después de crear el contenedor.
