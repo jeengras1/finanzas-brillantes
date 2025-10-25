@@ -1,0 +1,8 @@
+langchain
+langchain-community
+chromadb
+pypdf2
+fastapi
+uvicorn
+# Dependencia para el modelo de embeddings
+sentence-transformers
