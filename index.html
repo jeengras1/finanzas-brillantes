@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor de IA Open-Source (Simulación)</title>
+    <title>Monitor de IA Open-Source (Nexus)</title>
     <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Configuración de la fuente Inter -->
@@ -11,241 +11,246 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(circle at center, #1f2937, #000000);
         }
         /* Estilo para simular el brillo del monitor/terminal */
         .ai-monitor {
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            border: 1px solid rgba(0, 255, 0, 0.2);
         }
-        /* Estilo para la animación de carga (cursor parpadeante) */
+        .ai-text {
+            color: #10B981; /* green-500 */
+        }
+        .user-text {
+            color: #9CA3AF; /* gray-400 */
+        }
+        /* Cursor parpadeante */
         @keyframes blink-cursor {
-            from { border-right-color: rgba(0, 255, 0, 0.75); }
+            from { border-right-color: rgba(16, 185, 129, 0.75); }
             to { border-right-color: transparent; }
         }
         .blinking-cursor {
-            border-right: 2px solid rgba(0, 255, 0, 0.75);
+            border-right: 2px solid rgba(16, 185, 129, 0.75);
             animation: blink-cursor 0.7s step-end infinite;
+        }
+        textarea:focus {
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+            border-color: #10B981;
         }
     </style>
 </head>
-<body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4">
 
     <!-- Contenedor Principal de la Aplicación -->
-    <div class="w-full max-w-4xl bg-gray-800 rounded-xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
+    <div class="w-full max-w-4xl bg-gray-900 rounded-xl ai-monitor overflow-hidden flex flex-col h-[90vh]">
 
         <!-- Encabezado del Monitor -->
-        <header class="bg-gray-700 p-4 border-b-2 border-green-500/50">
-            <h1 class="text-2xl font-bold text-green-400">
-                <span class="mr-2 text-3xl">🤖</span> Proyecto Nexus
-                <span class="text-sm font-normal text-gray-400 block sm:inline-block sm:ml-4">
-                    Motor: Open-Source LLM (Llama/Mistral v3.4)
-                </span>
+        <header class="bg-gray-800 p-4 border-b-2 border-green-500/50 flex justify-between items-center">
+            <h1 class="text-xl sm:text-2xl font-bold text-green-400 flex items-center">
+                <span class="mr-2 text-3xl">🤖</span> Nexus Monitor RAG <span class="ml-4 text-xs bg-green-700/50 px-2 py-0.5 rounded-full text-green-200 hidden sm:inline">24/7 LIVE</span>
             </h1>
+            <div id="status-indicator" class="text-xs font-semibold px-3 py-1 rounded-full bg-red-800 text-red-300">OFFLINE</div>
         </header>
 
-        <!-- Área del Monitor/Historial de Conversación -->
-        <div id="chat-monitor" class="flex-grow p-6 space-y-4 overflow-y-auto ai-monitor bg-gray-900/90" style="scrollbar-width: none;">
-            <!-- Mensaje de Bienvenida de la IA -->
-            <div class="flex justify-start">
-                <div class="bg-gray-700/50 p-3 rounded-lg max-w-[80%] shadow-lg">
-                    <p class="font-semibold text-green-400 mb-1">Nexus AI:</p>
-                    <p class="text-gray-200">
-                        Bienvenido al **Monitor de IA Open-Source**. Estoy lista para ayudarte. Puedes pedirme que simule tareas de código, análisis o creatividad.
-                        <br><br>
-                        Ejemplo: `Genera un plan de 5 pasos para aprender React.`
-                    </p>
+        <!-- Área de Conversación (Monitor) -->
+        <main id="chat-window" class="flex-grow p-4 overflow-y-auto space-y-4 text-sm sm:text-base scroll-smooth">
+            <div class="flex flex-col">
+                <p class="ai-text font-semibold">Nexus Core:</p>
+                <div class="text-gray-300 bg-gray-800 p-3 rounded-lg max-w-3xl">
+                    <p>Iniciando sistema... <span class="blinking-cursor" id="initial-cursor"></span></p>
                 </div>
             </div>
-            <!-- Los mensajes se insertarán aquí por JavaScript -->
-        </div>
+        </main>
 
-        <!-- Caja de Escritura y Botón de Envío -->
-        <div class="p-4 bg-gray-700/70 border-t-2 border-green-500/50">
-            <div class="flex space-x-3">
-                <textarea
-                    id="user-input"
-                    class="flex-grow p-3 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none h-12 overflow-hidden"
-                    placeholder="Escribe tu consulta o comando aquí..."
+        <!-- Formulario de Entrada -->
+        <footer class="p-4 bg-gray-800 border-t-2 border-green-500/50">
+            <form id="chat-form" class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                <textarea 
+                    id="user-input" 
                     rows="1"
-                    oninput="autoExpand(this)"
-                    onkeydown="handleKeyDown(event)"
+                    class="flex-grow p-3 bg-gray-700 text-gray-100 rounded-lg resize-none placeholder-gray-400 focus:outline-none transition duration-200"
+                    placeholder="Pregunta a Nexus (Ej: ¿Cuál es el Build Command de Render?)"
+                    autocomplete="off"
                 ></textarea>
-                <button
+                <button 
+                    type="submit" 
                     id="send-button"
-                    onclick="sendMessage()"
-                    class="flex-shrink-0 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-md shadow-green-500/50 disabled:bg-gray-500 disabled:shadow-none mt-1 sm:mt-0"
-                    disabled
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-1 sm:mt-0 shadow-lg shadow-green-500/30"
                 >
                     Enviar
                 </button>
-            </div>
-        </div>
-
+            </form>
+        </footer>
     </div>
 
+    <!-- JavaScript para la interacción y conexión con la API de Render -->
     <script>
-        const chatMonitor = document.getElementById('chat-monitor');
+        // CONFIGURACIÓN CLAVE: URL de la API de Render
+        const RAG_API_BASE_URL = "https://nexus-ai-core.onrender.com"; 
+        
+        const chatWindow = document.getElementById('chat-window');
+        const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
+        const statusIndicator = document.getElementById('status-indicator');
 
-        let isResponding = false;
-        
-        // Función para expandir automáticamente el textarea
-        function autoExpand(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = (textarea.scrollHeight) + 'px';
-            
-            // Habilitar/Deshabilitar el botón de enviar
-            sendButton.disabled = textarea.value.trim() === '' || isResponding;
-        }
+        // --- Efectos y UI ---
+        function typeTextEffect(targetElement, text, callback) {
+            targetElement.innerHTML = '';
+            let i = 0;
+            const cursorSpan = document.createElement('span');
+            cursorSpan.className = 'blinking-cursor';
 
-        // Manejar la pulsación de la tecla Enter
-        function handleKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault(); // Evita el salto de línea por defecto
-                if (!sendButton.disabled) {
-                    sendMessage();
+            function type() {
+                if (i < text.length) {
+                    targetElement.innerHTML += text.charAt(i);
+                    targetElement.appendChild(cursorSpan);
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                    i++;
+                    setTimeout(type, 15); // Velocidad de escritura
+                } else {
+                    cursorSpan.remove();
+                    if (callback) callback();
                 }
             }
+            type();
         }
 
-        // Función para crear un nuevo elemento de mensaje
-        function createMessageElement(isUser, content, isThinking = false) {
-            const wrapper = document.createElement('div');
-            wrapper.className = \`flex \${isUser ? 'justify-end' : 'justify-start'}\`;
-
-            const bubble = document.createElement('div');
-            bubble.className = \`p-3 rounded-xl max-w-[80%] shadow-xl transition-all duration-300 \${
-                isUser 
-                ? 'bg-blue-600/80 text-white' 
-                : 'bg-gray-700/50 text-gray-200'
-            }\`;
+        function appendMessage(sender, text, sources = []) {
+            const messageContainer = document.createElement('div');
+            messageContainer.className = 'flex flex-col';
             
-            const header = document.createElement('p');
-            header.className = \`font-bold mb-1 \${isUser ? 'text-blue-200' : 'text-green-400'}\`;
-            header.textContent = isUser ? 'Tú:' : 'Nexus AI:';
-            bubble.appendChild(header);
-
-            const contentElement = document.createElement('p');
-            contentElement.innerHTML = content;
-            bubble.appendChild(contentElement);
-
-            if (isThinking) {
-                contentElement.classList.add('blinking-cursor');
-            }
-
-            wrapper.appendChild(bubble);
-            chatMonitor.appendChild(wrapper);
-
-            // Asegurar que el scroll esté siempre abajo
-            chatMonitor.scrollTop = chatMonitor.scrollHeight;
-            return contentElement; // Devolvemos el elemento de contenido para la animación de escritura
-        }
-
-        // Función de simulación de respuesta de la IA
-        async function simulateResponse(userMessage) {
-            isResponding = true;
-            sendButton.disabled = true;
-            userInput.classList.add('opacity-50');
-
-            const thinkingElement = createMessageElement(false, '...');
+            const senderP = document.createElement('p');
+            senderP.className = sender === 'ai' ? 'ai-text font-semibold' : 'user-text font-semibold';
+            senderP.textContent = sender === 'ai' ? 'Nexus Core:' : 'Tú:';
             
-            // Simular un tiempo de procesamiento
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const textDiv = document.createElement('div');
+            textDiv.className = sender === 'ai' 
+                ? 'text-gray-300 bg-gray-800 p-3 rounded-lg max-w-3xl' 
+                : 'text-gray-900 bg-gray-400 p-3 rounded-lg max-w-3xl self-end user-text';
             
-            thinkingElement.classList.remove('blinking-cursor');
+            messageContainer.appendChild(senderP);
+            messageContainer.appendChild(textDiv);
 
-            const responseText = getSimulatedResponse(userMessage);
+            chatWindow.appendChild(messageContainer);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
 
-            await typeTextEffect(thinkingElement, responseText, 25);
-            
-            isResponding = false;
-            sendButton.disabled = userInput.value.trim() === '';
-            userInput.classList.remove('opacity-50');
-            userInput.focus();
-        }
-
-        // Efecto de escritura token por token
-        function typeTextEffect(element, text, delay = 50) {
-            return new Promise(resolve => {
-                let i = 0;
-                element.innerHTML = '';
-                element.classList.add('blinking-cursor');
-
-                function type() {
-                    if (i < text.length) {
-                        element.innerHTML += text.charAt(i);
-                        i++;
-                        chatMonitor.scrollTop = chatMonitor.scrollHeight; // Mantener scroll
-                        setTimeout(type, delay);
-                    } else {
-                        element.classList.remove('blinking-cursor');
-                        resolve();
+            if (sender === 'ai') {
+                // Para IA, aplica el efecto de escritura y añade las fuentes
+                typeTextEffect(textDiv, text, () => {
+                    if (sources.length > 0) {
+                        const sourceP = document.createElement('p');
+                        sourceP.className = 'mt-2 text-xs text-green-300 opacity-75 italic';
+                        sourceP.textContent = ;
+                        textDiv.appendChild(sourceP);
                     }
-                }
-                type();
-            });
-        }
-
-        // Lógica de respuesta simulada
-        function getSimulatedResponse(message) {
-            const lowerMsg = message.toLowerCase();
-
-            if (lowerMsg.includes('plan de 5 pasos para aprender react')) {
-                return \`¡Excelente elección! React es fundamental. Aquí tienes un plan basado en los principios de aprendizaje de la comunidad open-source:
-
-                1. **Fundamentos de JavaScript Moderno (ES6+):** Repasa 'let', 'const', arrow functions, promesas y async/await. Sin esto, React será confuso.
-                2. **Componentes y Props:** Entiende la diferencia entre componentes de clase y funcionales (prioriza funcionales) y cómo pasar datos con 'props'.
-                3. **Hooks Esenciales (useState y useEffect):** Domina cómo gestionar el estado y los efectos secundarios. Es la base de la programación funcional en React.
-                4. **Manejo de Rutas y Fetching de Datos:** Aprende a usar un router (como React Router Dom) y cómo integrar APIs externas usando 'fetch' o Axios.
-                5. **Manejo de Estado Avanzado:** Explora Context API o una librería como Redux/Zustand para manejar estados globales complejos. ¡Práctica con proyectos pequeños!\`;
-            } else if (lowerMsg.includes('código') || lowerMsg.includes('code')) {
-                return \`Simulación de Generación de Código (Python):
-
-                \`\`\`python
-                # Definición de un generador de Fibonacci (código abierto y limpio)
-                def fibonacci_generator(limit):
-                    a, b = 0, 1
-                    while a < limit:
-                        yield a
-                        a, b = b, a + b
-
-                # Uso del generador
-                for number in fibonacci_generator(100):
-                    print(number)
-                \`\`\`
-                Este es un ejemplo de código eficiente y legible. ¿Qué otro lenguaje o algoritmo te gustaría ver?\`;
-            } else if (lowerMsg.includes('hola') || lowerMsg.includes('saludo')) {
-                return \`¡Hola! Soy Nexus AI, lista para procesar tu siguiente consulta con un enfoque en la transparencia y la modularidad del código abierto. ¿En qué puedo ayudarte hoy?\`;
-            } else if (lowerMsg.includes('open-source') || lowerMsg.includes('código abierto')) {
-                return \`El concepto de código abierto es central para el avance de la IA. Modelos como Llama, Mistral y la suite de herramientas Hugging Face democratizan el acceso al conocimiento y permiten la auditoría y mejora continua por parte de la comunidad global. Esta filosofía impulsa la innovación de manera colaborativa.\`;
+                });
             } else {
-                return \`**[PROCESANDO CONSULTA...]** He analizado tu entrada. Este es un desafío interesante que requiere una arquitectura LLM compleja. Como modelo de código abierto, mi respuesta simulada es: 'La complejidad intrínseca de esta consulta sugiere que la solución óptima se encuentra en la intersección de un Transformer con un mecanismo de atención distribuida. Se recomienda una reescritura modular y la optimización del kernel de inferencia.'\`;
+                textDiv.textContent = text;
             }
         }
 
-        // Función principal para enviar el mensaje
-        function sendMessage() {
-            const message = userInput.value.trim();
-            if (message === '' || isResponding) return;
+        // --- Lógica de Conexión de API ---
 
-            // 1. Mostrar el mensaje del usuario
-            createMessageElement(true, message);
-            
-            // 2. Limpiar la entrada y restablecer el tamaño
-            userInput.value = '';
-            userInput.style.height = '48px'; // Altura inicial de 12 (h-12)
-            sendButton.disabled = true;
-
-            // 3. Simular la respuesta de la IA
-            simulateResponse(message);
+        async function checkStatus() {
+            try {
+                const response = await fetch();
+                const data = await response.json();
+                
+                if (data.status === 'ready') {
+                    statusIndicator.textContent = 'LIVE';
+                    statusIndicator.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-green-700 text-green-300';
+                    document.getElementById('initial-cursor').remove();
+                    return true;
+                }
+            } catch (error) {
+                console.error("API Status Check Failed:", error);
+            }
+            statusIndicator.textContent = 'OFFLINE';
+            statusIndicator.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-red-800 text-red-300';
+            return false;
         }
 
-        // Inicializar el botón de envío
-        window.onload = function() {
+        // --- Manejo del Formulario ---
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const question = userInput.value.trim();
+            if (!question) return;
+
+            // Deshabilitar la entrada y botón
             sendButton.disabled = true;
-            // Asegurar que el scroll esté abajo al cargar (por si hay historial, aunque aquí no lo hay)
-            chatMonitor.scrollTop = chatMonitor.scrollHeight;
+            userInput.disabled = true;
+            
+            // 1. Mostrar mensaje del usuario
+            appendMessage('user', question);
+            userInput.value = '';
+
+            // 2. Mostrar mensaje de carga de la IA
+            appendMessage('ai', 'Procesando consulta RAG...');
+            const lastAiMessage = chatWindow.lastChild.querySelector('div');
+            
+            // 3. Enviar a la API de Render
+            try {
+                const response = await fetch(, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'jeengras1-monitor', // ID simulado
+                        question: question,
+                        chat_history: []
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Limpiar el mensaje de carga antes de mostrar la respuesta real
+                lastAiMessage.textContent = ''; 
+
+                if (response.ok) {
+                    // Mostrar respuesta RAG con fuentes
+                    appendMessage('ai', data.response, data.sources);
+                } else {
+                    // Manejar errores de API (ej: API Key no configurada)
+                    appendMessage('ai', );
+                }
+
+            } catch (error) {
+                // Manejar errores de red o CORS
+                console.error('Error en la petición al servidor:', error);
+                lastAiMessage.textContent = '';
+                appendMessage('ai', '[ERROR DE CONEXIÓN] No se pudo conectar al Cerebro RAG. Verifique la URL de Render y el estado "LIVE".');
+            } finally {
+                // Habilitar la entrada
+                sendButton.disabled = false;
+                userInput.disabled = false;
+                userInput.focus();
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+        });
+
+        // --- Inicialización ---
+        window.onload = () => {
+            // Eliminar el cursor de la bienvenida temporal
+            document.getElementById('initial-cursor').remove();
+            
+            // Revisa el estado cada 10 segundos
+            setInterval(checkStatus, 10000); 
+            // Revisa el estado inmediatamente
+            checkStatus();
+            
+            // Mensaje de bienvenida real
+            appendMessage('ai', 'Bienvenido a Nexus Core. Soy tu monitor de IA Open-Source. Mi conocimiento proviene de los documentos de tu repositorio de GitHub. Pregúntame, por ejemplo: "¿Cuál es mi build command en Render?"', []);
+            
+            // Ajuste de altura del textarea (para que sea responsivo)
+            userInput.addEventListener('input', () => {
+                userInput.style.height = 'auto';
+                userInput.style.height = (userInput.scrollHeight) + 'px';
+            });
         };
+
     </script>
 </body>
 </html>
