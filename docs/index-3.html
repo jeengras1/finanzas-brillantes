@@ -1,0 +1,50 @@
+<!-- ============================================================
+     SODA‑NEXUS — Monitor Web Institucional (Versión 3)
+     Nueva interfaz independiente. No modifica versiones previas.
+     ============================================================ -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"> <!-- OBS: Codificación estándar -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- OBS: Responsive -->
+
+    <title>SODA‑NEXUS — Monitor v3</title> <!-- OBS: Título institucional -->
+
+    <script src="./config.js"></script>      <!-- OBS: Configuración soberana -->
+    <script src="./monitor-2.js"></script>   <!-- OBS: Nueva lógica principal -->
+    <script src="./snx-logs-2.js"></script>  <!-- OBS: Nueva lógica de logs -->
+
+    <style>
+        body { font-family: Arial; background:#0d1117; color:#e6edf3; padding:20px; }
+        h1 { color:#58a6ff; }
+        .card { background:#161b22; padding:20px; border-radius:8px; margin-top:20px; border:1px solid #30363d; }
+        .label { font-weight:bold; color:#79c0ff; }
+        pre { white-space:pre-wrap; background:#0f141a; padding:15px; border-radius:6px; border:1px solid #30363d; max-height:400px; overflow-y:auto; }
+    </style>
+</head>
+
+<body>
+    <h1>Monitor Soberano — SODA‑NEXUS (v3)</h1> <!-- OBS: Encabezado -->
+
+    <div class="card">
+        <div class="label">Estado del backend:</div>
+        <div id="snx-status-v3">Cargando...</div> <!-- OBS: Contenedor v3 -->
+    </div>
+
+    <div class="card">
+        <div class="label">Logs del sistema (v3):</div>
+        <pre id="snx-logs-v3">Cargando logs...</pre> <!-- OBS: Contenedor logs v3 -->
+    </div>
+</body>
+
+<!-- ============================================================
+     PIE DE PÁGINA INSTITUCIONAL — SODA‑NEXUS
+     Este archivo pertenece al sistema soberano SODA‑NEXUS.
+     REGLAS INSTITUCIONALES:
+     1. No modificar líneas sin aprobación institucional.
+     2. No sobrescribir archivos previos; siempre crear nuevas versiones.
+     3. Mantener encabezado, observaciones y pie de página.
+     4. Garantizar anti‑amnesia y trazabilidad.
+     ============================================================ -->
+</html>

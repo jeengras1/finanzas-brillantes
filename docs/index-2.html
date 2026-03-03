@@ -1,0 +1,96 @@
+<!-- ============================================================
+     SODA‑NEXUS — Monitor Web Institucional (Versión 2)
+     Nueva versión independiente que incluye módulo de logs.
+     No modifica ni reemplaza versiones anteriores.
+     ============================================================ -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- OBS: Codificación estándar para compatibilidad. -->
+    <meta charset="UTF-8">
+
+    <!-- OBS: Diseño adaptable para móviles. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- OBS: Título institucional de esta versión del monitor. -->
+    <title>SODA‑NEXUS — Monitor v2</title>
+
+    <!-- OBS: Carga la configuración soberana (URL del backend). -->
+    <script src="./config.js"></script>
+
+    <!-- OBS: Carga la lógica principal del monitor. -->
+    <script src="./monitor.js"></script>
+
+    <!-- OBS: Carga el módulo de logs institucional. -->
+    <script src="./snx-logs.js"></script>
+
+    <!-- OBS: Estilos mínimos para claridad visual. -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            padding: 20px;
+        }
+        h1 {
+            color: #58a6ff;
+        }
+        .card {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #30363d;
+        }
+        .label {
+            font-weight: bold;
+            color: #79c0ff;
+        }
+        pre {
+            white-space: pre-wrap;
+            background: #0f141a;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- OBS: Encabezado visible del monitor. -->
+    <h1>Monitor Soberano — SODA‑NEXUS (v2)</h1>
+
+    <!-- OBS: Tarjeta que muestra el estado del backend. -->
+    <div class="card">
+        <div class="label">Estado del backend:</div>
+        <div id="snx-status">Cargando...</div>
+    </div>
+
+    <!-- OBS: Tarjeta que muestra los logs soberanos del backend. -->
+    <div class="card">
+        <div class="label">Logs del sistema:</div>
+        <pre id="snx-logs">Cargando logs...</pre>
+    </div>
+</body>
+
+<!-- ============================================================
+     PIE DE PÁGINA INSTITUCIONAL — SODA‑NEXUS
+     Este archivo pertenece al sistema soberano SODA‑NEXUS.
+     REGLAS INSTITUCIONALES:
+     1. Las instrucciones deben darse SIEMPRE en orden y completas.
+     2. No se deben modificar líneas sin aprobación institucional.
+     3. Si un script existe en el sistema, debe solicitarse, leerse
+        y modificarse únicamente sobre su contenido real.
+     4. No mover, eliminar o sobrescribir archivos sin inspección
+        previa del filesystem para evitar pérdida de memoria.
+     5. Cada script o documento debe incluir encabezado, observaciones
+        por línea y este pie de página institucional.
+     6. Mantener coherencia con la estructura soberana del Estado.
+     7. Garantizar anti‑amnesia y auditabilidad total.
+     8. Realizar la mayoría de tareas en un solo chat para preservar
+        el contexto operativo y la memoria institucional.
+     ============================================================ -->
+</html>
