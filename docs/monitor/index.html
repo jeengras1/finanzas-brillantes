@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitor-Termux Soberano V3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { background:#020617; color:#e5e7eb; font-family: system-ui, sans-serif; margin:0; padding:0; }
+    header { padding:1rem; border-bottom:1px solid #1f2937; display:flex; justify-content:space-between; align-items:center; }
+    .status-online { color:#22c55e; }
+    .status-offline { color:#ef4444; }
+    main { display:flex; height:calc(100vh - 56px); }
+    .sidebar { width:30%; border-right:1px solid #1f2937; padding:1rem; overflow:auto; }
+    .content { flex:1; padding:1rem; overflow:auto; }
+    ul { list-style:none; padding-left:0; }
+    li { cursor:pointer; padding:2px 0; }
+    li span.type-dir { color:#38bdf8; }
+    li span.type-file { color:#e5e7eb; }
+    pre { background:#020617; border:1px solid #1f2937; padding:0.5rem; white-space:pre-wrap; }
+    small { color:#9ca3af; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <strong>Monitor-Termux Soberano V3</strong><br>
+      <small id="timestamp">Sin conexión aún</small>
+    </div>
+    <div id="status" class="status-offline">● OFFLINE</div>
+  </header>
+  <main>
+    <section class="sidebar">
+      <h3>Explorador de archivos</h3>
+      <div>
+        <small>Ruta relativa a ~/soda/:</small><br>
+        <input id="path-input" type="text" value="" style="width:100%;margin:4px 0;">
+        <button id="load-path">Cargar</button>
+      </div>
+      <ul id="file-list"></ul>
+    </section>
+    <section class="content">
+      <h3>Contenido</h3>
+      <div id="file-path"></div>
+      <pre id="file-content">Selecciona un archivo para ver su contenido.</pre>
+    </section>
+  </main>
+  <script src="monitor.js"></script>
+</body>
+</html>
