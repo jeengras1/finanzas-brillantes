@@ -1,77 +1,49 @@
-<!-- ============================================================
-     SODA‑NEXUS — Monitor Web Institucional
-     Interfaz soberana para visualizar el estado del backend.
-     ============================================================ -->
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- OBS: Define codificación estándar para compatibilidad. -->
-    <meta charset="UTF-8">
-
-    <!-- OBS: Permite diseño adaptable en dispositivos móviles. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- OBS: Título institucional del monitor. -->
-    <title>SODA‑NEXUS — Monitor</title>
-
-    <!-- OBS: Carga la configuración soberana (URL del backend). -->
-    <script src="./config.js"></script>
-
-    <!-- OBS: Carga la lógica del monitor (solicitudes al backend). -->
-    <script src="./monitor.js"></script>
-
-    <!-- OBS: Estilos mínimos para mantener claridad visual. -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
-            padding: 20px;
-        }
-        h1 {
-            color: #58a6ff;
-        }
-        .card {
-            background: #161b22;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border: 1px solid #30363d;
-        }
-        .label {
-            font-weight: bold;
-            color: #79c0ff;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Monitor-Termux Soberano V3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { background:#020617; color:#e5e7eb; font-family: system-ui, sans-serif; margin:0; padding:0; }
+    header { padding:1rem; border-bottom:1px solid #1f2937; display:flex; justify-content:space-between; align-items:center; }
+    .status-online { color:#22c55e; }
+    .status-offline { color:#ef4444; }
+    main { display:flex; height:calc(100vh - 56px); }
+    .sidebar { width:30%; border-right:1px solid #1f2937; padding:1rem; overflow:auto; }
+    .content { flex:1; padding:1rem; overflow:auto; }
+    ul { list-style:none; padding-left:0; }
+    li { cursor:pointer; padding:2px 0; }
+    li span.type-dir { color:#38bdf8; }
+    li span.type-file { color:#e5e7eb; }
+    pre { background:#020617; border:1px solid #1f2937; padding:0.5rem; white-space:pre-wrap; }
+    small { color:#9ca3af; }
+  </style>
 </head>
-
 <body>
-    <!-- OBS: Encabezado visible del monitor. -->
-    <h1>Monitor Soberano — SODA‑NEXUS</h1>
-
-    <!-- OBS: Contenedor donde se mostrará el estado del backend. -->
-    <div class="card">
-        <div class="label">Estado del backend:</div>
-        <div id="snx-status">Cargando...</div>
+  <header>
+    <div>
+      <strong>Monitor-Termux Soberano V3</strong><br>
+      <small id="timestamp">Sin conexión aún</small>
     </div>
+    <div id="status" class="status-offline">● OFFLINE</div>
+  </header>
+  <main>
+    <section class="sidebar">
+      <h3>Explorador de archivos</h3>
+      <div>
+        <small>Ruta relativa a ~/soda/:</small><br>
+        <input id="path-input" type="text" value="" style="width:100%;margin:4px 0;">
+        <button id="load-path">Cargar</button>
+      </div>
+      <ul id="file-list"></ul>
+    </section>
+    <section class="content">
+      <h3>Contenido</h3>
+      <div id="file-path"></div>
+      <pre id="file-content">Selecciona un archivo para ver su contenido.</pre>
+    </section>
+  </main>
+  <script src="monitor.js"></script>
 </body>
-
-<!-- ============================================================
-     PIE DE PÁGINA INSTITUCIONAL — SODA‑NEXUS
-     Este archivo pertenece al sistema soberano SODA‑NEXUS.
-     REGLAS INSTITUCIONALES:
-     1. Las instrucciones deben darse SIEMPRE en orden y completas.
-     2. No se deben modificar líneas sin aprobación institucional.
-     3. Si un script existe en el sistema, debe solicitarse, leerse
-        y modificarse únicamente sobre su contenido real.
-     4. No mover, eliminar o sobrescribir archivos sin inspección
-        previa del filesystem para evitar pérdida de memoria.
-     5. Cada script o documento debe incluir encabezado, observaciones
-        por línea y este pie de página institucional.
-     6. Mantener coherencia con la estructura soberana del Estado.
-     7. Garantizar anti‑amnesia y auditabilidad total.
-     8. Realizar la mayoría de tareas en un solo chat para preservar
-        el contexto operativo y la memoria institucional.
-     ============================================================ -->
 </html>

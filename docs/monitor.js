@@ -1,46 +1,75 @@
-/* ============================================================
-   SODA‑NEXUS — Lógica del Monitor Web
-   Archivo institucional que controla la comunicación entre el
-   monitor y el backend soberano.
-   ============================================================ */
+const backendBase = "http://127.0.0.1:5051";
 
-/* OBS: Obtiene la URL soberana definida en config.js. */
-const API = window.SNX_BACKEND_URL;
+const statusEl = document.getElementById("status");
+const tsEl = document.getElementById("timestamp");
+const pathInput = document.getElementById("path-input");
+const loadBtn = document.getElementById("load-path");
+const fileList = document.getElementById("file-list");
+const filePathEl = document.getElementById("file-path");
+const fileContentEl = document.getElementById("file-content");
 
-/* OBS: Función principal para solicitar el estado del backend. */
-async function snx_getStatus() {
-    /* OBS: Realiza una solicitud GET al backend Flask. */
-    const response = await fetch(`${API}/status`);
-
-    /* OBS: Convierte la respuesta en JSON para uso del monitor. */
-    const data = await response.json();
-
-    /* OBS: Actualiza el DOM con la información recibida. */
-    document.getElementById("snx-status").innerText = data.status;
-
-    /* OBS: Retorna los datos para posibles usos adicionales. */
-    return data;
+async function checkEstado() {
+  try {
+    const res = await fetch(backendBase + "/estado");
+    if (!res.ok) throw new Error("Estado no OK");
+    const data = await res.json();
+    statusEl.textContent = "● ONLINE";
+    statusEl.className = "status-online";
+    const date = new Date(data.timestamp * 1000);
+    tsEl.textContent = "Último latido: " + date.toLocaleString();
+  } catch (e) {
+    statusEl.textContent = "● OFFLINE";
+    statusEl.className = "status-offline";
+    tsEl.textContent = "Sin conexión al backend";
+  }
 }
 
-/* OBS: Ejecuta la función automáticamente al cargar la página. */
-window.onload = () => {
-    snx_getStatus();
-};
+async function loadPath(path) {
+  try {
+    const res = await fetch(backendBase + "/carpetas?path=" + encodeURIComponent(path));
+    if (!res.ok) throw new Error("Error al listar");
+    const data = await res.json();
+    fileList.innerHTML = "";
+    (data.items || []).forEach(item => {
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      span.textContent = item.name;
+      span.className = item.type === "dir" ? "type-dir" : "type-file";
+      li.appendChild(span);
+      li.addEventListener("click", () => {
+        if (item.type === "dir") {
+          const newPath = (path ? path + "/" : "") + item.name;
+          pathInput.value = newPath;
+          loadPath(newPath);
+        } else {
+          const filePath = (path ? path + "/" : "") + item.name;
+          loadFile(filePath);
+        }
+      });
+      fileList.appendChild(li);
+    });
+  } catch (e) {
+    fileList.innerHTML = "<li>Error al cargar ruta</li>";
+  }
+}
 
-/* ============================================================
-   PIE DE PÁGINA INSTITUCIONAL — SODA‑NEXUS
-   Este archivo pertenece al sistema soberano SODA‑NEXUS.
-   REGLAS INSTITUCIONALES:
-   1. Las instrucciones deben darse SIEMPRE en orden y completas.
-   2. No se deben modificar líneas sin aprobación institucional.
-   3. Si un script existe en el sistema, debe solicitarse, leerse
-      y modificarse únicamente sobre su contenido real.
-   4. No mover, eliminar o sobrescribir archivos sin inspección
-      previa del filesystem para evitar pérdida de memoria.
-   5. Cada script o documento debe incluir encabezado, observaciones
-      por línea y este pie de página institucional.
-   6. Mantener coherencia con la estructura soberana del Estado.
-   7. Garantizar anti‑amnesia y auditabilidad total.
-   8. Realizar la mayoría de tareas en un solo chat para preservar
-      el contexto operativo y la memoria institucional.
-   ============================================================ */
+async function loadFile(path) {
+  try {
+    const res = await fetch(backendBase + "/archivo?path=" + encodeURIComponent(path));
+    if (!res.ok) throw new Error("Error al leer archivo");
+    const data = await res.json();
+    filePathEl.textContent = "Archivo: " + path;
+    fileContentEl.textContent = data.content;
+  } catch (e) {
+    filePathEl.textContent = "Archivo: " + path;
+    fileContentEl.textContent = "Error al leer archivo.";
+  }
+}
+
+loadBtn.addEventListener("click", () => {
+  loadPath(pathInput.value.trim());
+});
+
+checkEstado();
+setInterval(checkEstado, 10000);
+loadPath("");
